@@ -1,0 +1,43 @@
+# 図やグラフを図示するためのライブラリをインポートする。
+#Anacondaを見る限りではここはデフォルトでできている。
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+#参考URL
+#https://www.casleyconsulting.co.jp/blog/engineer/6168/
+#https://techacademy.jp/magazine/39544
+#https://yukun.info/python-file/
+
+/*
+import pandas as pd
+import matplotlib.pyplot as plt
+ 
+#CSVファイルをUTF-8形式で読み込む
+data = pd.read_csv('gold3.csv',encoding = 'UTF8')
+#dataを出力
+data
+
+#グラフ作成　（折れ線グラフ
+data.plot()
+*/
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+f=open('demodata.txt')
+next(f)
+line=f.readline().split(',')
+#print(line[0])
+
+while line:
+    #print(line[0],line[3])
+    x=line[0]
+    y=line[3]
+    print(x)
+    print(y)
+    line=f.readline().split(',')
+    plt.plot(x,y)
+#plt.scattert(line[0],line[3])
+#print(x,y)
