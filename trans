@@ -1,0 +1,182 @@
+import glob
+import os
+import datetime
+from PIL import ImageGrab, Image
+import sys
+import numpy as np
+import cv2
+import pyocr
+import pyocr.builders
+
+import PySimpleGUI as sg
+import configparser
+import deepl
+import requests
+import pyperclip
+
+sg.theme('LightGray1')
+
+# 保存先ディレクトリの指定
+directory = "C:/Users/sg_5v/Pictures/study"
+
+# クリップボード内の情報を取得する
+clipboard_image = ImageGrab.grabclipboard()
+
+# ファイルネームをを指定する。
+file_name = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+file_name = os.path.join(directory, "{}.jpg".format(file_name))
+#print(file_name)
+
+#左側中身
+txt1=sg.Text('読み取り画像を選択')
+txt2=sg.Text('(クリップボード内の画像を使用する場合はUpload不要)')
+up1=sg.FileBrowse('Upload', key='inputFilePath',target='input1')
+up2=sg.InputText(key='input1',default_text='')
+btn1=sg.Button('読み取り', key='upload')
+
+txt3=sg.Text('読み取り結果')
+box1=sg.Multiline(size=(100,20), key='page1')
+btn2=sg.Button('結果コピー', key='before')
+
+#右側中身
+txt4=sg.Text('翻訳結果')
+box2=sg.Multiline('', size=(100, 23), key='page2')
+btn3=sg.Button('結果コピー', key='after')
+btn4=sg.Button('DeepLで翻訳', key='deepl')
+
+#sg.Frameでフレームを定義
+#フレーム1(中はからっぽ、フレームサイズだけ指定)
+frame1 = sg.Frame('',
+    [
+        [txt1],
+        [txt2],
+        [up1,up2,btn1],
+        [txt3],
+        [box1],
+        [btn2]
+
+    ] , size=(500, 500) #幅,高さ
+)
+#フレーム2(中はからっぽ、フレームサイズだけ指定)
+frame2 = sg.Frame('',
+    [
+        [btn4],
+        [txt4],
+        [box2],
+        [btn3]
+    ] , size=(500, 500) #幅,高さ
+)
+
+#全体レイアウト
+layout = [
+    [frame1,frame2]
+]
+
+
+
+#GUIタイトルと全体レイアウトをのせたWindowを定義する。画面サイズは省略OK
+#resizableでWindowサイズをマウスで変更できるようになる
+window = sg.Window('文字認識アプリ試作', layout, resizable=True)
+#GUI表示実行部分
+while True:
+    # ウィンドウ表示
+    event, value = window.read()
+#    up_image=value['input1']
+#    print(value['input1'])
+#    print(event,values)
+
+
+    #クローズボタンの処理
+    if event is None:
+#        print('exit')
+        break
+        
+#        elif up_image or file_name:
+#            sg.popup(file_name,up_image)
+
+#    print(value['input1']+6)
+#    elif event == 'upload' and file_name:
+#        import internal
+
+    if event == 'upload':
+        up_image=value['input1']
+        print(up_image)
+        im2=cv2.imread(up_image)
+
+        #画像拡大し再保存
+        im2=cv2.resize(im2,dsize=None,fx=2.5,fy=2.5)
+        up_image=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_2")
+        up_image=os.path.join(directory,"{}.jpg".format(up_image))
+        cv2.imwrite(up_image,im2)
+
+        #gray
+        im2=cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
+        up_image=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_3")
+        up_image=os.path.join(directory,"{}.jpg".format(up_image))
+        cv2.imwrite(up_image,im2)
+
+
+        """以下文字認識"""
+
+        # 1.インストール済みのTesseractのパスを通す
+        path_tesseract = "C:\Program Files\Tesseract-OCR"
+        if path_tesseract not in os.environ["PATH"].split(os.pathsep):
+            os.environ["PATH"] += os.pathsep + path_tesseract
+
+        # 2.OCRエンジンの取得
+        tools = pyocr.get_available_tools()
+        tool = tools[0]
+
+        # 3.原稿画像の読み込み
+        img_org = Image.open(up_image)
+
+        # 4.ＯＣＲ実行
+        builder = pyocr.builders.TextBuilder()
+        result = tool.image_to_string(img_org, lang="jpn", builder=builder)
+
+        #print(result)
+        window["page1"].update(result)
+        
+        
+    if event == 'deepl':
+        API_KEY="ceb16ca6-0983-dc86-ef57-0bde5bfb096f:fx"
+        # URLクエリに仕込むパラメータの辞書を作っておく
+        params = {
+            "auth_key": API_KEY,
+            "text": result.replace('-\n','').replace('\n',''),
+            "source_lang": 'EN', # 入力テキストの言語
+            "target_lang": 'JA'  # 出力テキストの言語
+        }
+        # パラメータと一緒にPOSTする
+        request = requests.post("https://api-free.deepl.com/v2/translate", data=params)
+        result = request.json()
+        window["page2"].update(result)
+        #print(result)
+
+      
+
+    if event == 'before':
+        data1=value['page1']
+        # クリップボードへコピー
+        pyperclip.copy(data1)
+#        print('クリップボードへコピーされたテキスト＝',data1)
+        getdata1 = pyperclip.paste()
+#        print('クリップボードから取り出したテキスト＝',getdata1)
+        sg.popup("コピーしました")
+
+    if event == 'after':
+        data2=value['page2']
+        # クリップボードへコピー
+        pyperclip.copy(data2)
+#        print('クリップボードへコピーされたテキスト＝',data2)
+        getdata2 = pyperclip.paste()
+#        print('クリップボードから取り出したテキスト＝',getdata2)
+        sg.popup("コピーしました")
+
+
+        
+   
+#print(up_image)   
+#print(event,value)
+
+window.close()
