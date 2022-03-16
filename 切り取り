@@ -1,0 +1,110 @@
+import glob
+import os
+import datetime
+from PIL import ImageGrab, Image
+import sys
+import numpy as np
+import cv2
+import pyocr
+import pyocr.builders
+
+"""以下画像認識"""
+
+# 保存先ディレクトリの指定
+directory = "C:/Users/sg_5v/Pictures/study"
+
+# クリップボード内の情報を取得する
+clipboard_image = ImageGrab.grabclipboard()
+
+# ファイルネームをを指定する。
+file_name = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+file_name = os.path.join(directory, "{}.jpg".format(file_name))
+
+# clioboard_imageがImage.Image型の場合は保存する
+if isinstance(clipboard_image, Image.Image):
+    clipboard_image.save(file_name, optimize=True, quality=95)
+    print("saved to {}".format(file_name))
+else:
+    print("no image")
+
+print(file_name)
+
+
+"""以下画像処理"""
+
+#画像読み込み
+im=cv2.imread(file_name)
+
+#画像拡大し再保存
+multiple=5
+#height,width,channels=im.shape[:3]
+#print("width:"+str(width))
+
+#width2=width*multiple
+
+im=cv2.resize(im,dsize=None,fx=2.5,fy=2.5)
+file_name=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_2")
+file_name=os.path.join(directory,"{}.jpg".format(file_name))
+cv2.imwrite(file_name,im)
+
+"""
+im=cv2.resize(im,int(width*multiple),int(height*multiple))
+
+
+"""
+#gray
+im=cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+file_name=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_3")
+file_name=os.path.join(directory,"{}.jpg".format(file_name))
+cv2.imwrite(file_name,im)
+"""
+#平滑化
+im=cv2.GaussianBlur(im,(5,5),0)
+file_name=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_3")
+file_name=os.path.join(directory,"{}.jpg".format(file_name))
+cv2.imwrite(file_name,im)
+
+#threshold
+im=cv2.adaptiveThreshold(
+    im
+    ,255
+    ,cv2.ADAPTIVE_THRESH_GAUSSIAN_C
+    ,cv2.THRESH_BINARY
+    ,11
+    ,2
+)
+file_name=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_4")
+file_name=os.path.join(directory,"{}.jpg".format(file_name))
+cv2.imwrite(file_name,im)
+
+
+#抽出する色の下限
+bgrLower=np.array([128,128,128])
+#抽出する色の上限
+bgrUpper=np.array([0,0,0])
+
+img_mask=cv2.inRange(im,bgrLower,bgrUpper)
+extract=cv2.bitewise_and(im,im,mask=img_mask)
+cv2.imwrite(filename,extract)
+"""
+
+"""以下文字認識"""
+
+# 1.インストール済みのTesseractのパスを通す
+path_tesseract = "C:\Program Files\Tesseract-OCR"
+if path_tesseract not in os.environ["PATH"].split(os.pathsep):
+    os.environ["PATH"] += os.pathsep + path_tesseract
+
+# 2.OCRエンジンの取得
+tools = pyocr.get_available_tools()
+tool = tools[0]
+
+# 3.原稿画像の読み込み
+img_org = Image.open(file_name)
+
+# 4.ＯＣＲ実行
+builder = pyocr.builders.TextBuilder()
+result = tool.image_to_string(img_org, lang="jpn", builder=builder)
+
+print(result)
+
