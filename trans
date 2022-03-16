@@ -1,120 +1,117 @@
-import glob
 import os
 import datetime
+import time
 from PIL import ImageGrab, Image
 import sys
-import numpy as np
 import cv2
 import pyocr
 import pyocr.builders
 
 import PySimpleGUI as sg
 import configparser
-import deepl
 import requests
 import pyperclip
+import json
 
 sg.theme('LightGray1')
 
-# 保存先ディレクトリの指定
-directory = "C:/Users/sg_5v/Pictures/study"
 
 # クリップボード内の情報を取得する
-clipboard_image = ImageGrab.grabclipboard()
-
-# ファイルネームをを指定する。
-file_name = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-file_name = os.path.join(directory, "{}.jpg".format(file_name))
-#print(file_name)
-
-#左側中身
-txt1=sg.Text('読み取り画像を選択')
-txt2=sg.Text('(クリップボード内の画像を使用する場合はUpload不要)')
-up1=sg.FileBrowse('Upload', key='inputFilePath',target='input1')
-up2=sg.InputText(key='input1',default_text='')
-btn1=sg.Button('読み取り', key='upload')
-
-txt3=sg.Text('読み取り結果')
-box1=sg.Multiline(size=(100,20), key='page1')
-btn2=sg.Button('結果コピー', key='before')
-
-#右側中身
-txt4=sg.Text('翻訳結果')
-box2=sg.Multiline('', size=(100, 23), key='page2')
-btn3=sg.Button('結果コピー', key='after')
-btn4=sg.Button('DeepLで翻訳', key='deepl')
-
-#sg.Frameでフレームを定義
-#フレーム1(中はからっぽ、フレームサイズだけ指定)
-frame1 = sg.Frame('',
-    [
-        [txt1],
-        [txt2],
-        [up1,up2,btn1],
-        [txt3],
-        [box1],
-        [btn2]
-
-    ] , size=(500, 500) #幅,高さ
-)
-#フレーム2(中はからっぽ、フレームサイズだけ指定)
-frame2 = sg.Frame('',
-    [
-        [btn4],
-        [txt4],
-        [box2],
-        [btn3]
-    ] , size=(500, 500) #幅,高さ
-)
-
-#全体レイアウト
-layout = [
-    [frame1,frame2]
-]
+#clipboard_image = ImageGrab.grabclipboard()
 
 
+"""MAIN_LAYOUT"""
+def main_win():
+    frame1 = sg.Frame('',
+        [
+            [sg.Text('読み取り画像を選択')],
+    #        [sg.Text('(クリップボード内の画像を使用する場合はUpload不要)')],
+            [sg.FileBrowse('Upload', key='inputFilePath',target='input1'), sg.InputText(key='input1',default_text=''), sg.Button('読み取り', key='upload')],
+            [sg.Text('読み取り結果')],
+            [sg.Multiline(size=(100,20), key='page1')],
+            [sg.Button('結果コピー', key='before'), sg.Text('', key='copy1')]
 
-#GUIタイトルと全体レイアウトをのせたWindowを定義する。画面サイズは省略OK
-#resizableでWindowサイズをマウスで変更できるようになる
-window = sg.Window('文字認識アプリ試作', layout, resizable=True)
+        ] , size=(500, 500) #幅,高さ
+    )
+    #フレーム2(中はからっぽ、フレームサイズだけ指定)
+    frame2 = sg.Frame('',
+        [
+            [sg.Button('DeepLで翻訳', key='')],  # key='deepl' プロキシエラーのため退避
+            [sg.Text('翻訳結果')],
+            [sg.Multiline('', size=(100, 23), key='page2')],
+            [sg.Button('結果コピー', key='after'), sg.Text('', key='copy2')]
+        ] , size=(500, 500) #幅,高さ
+    )
+
+    #全体レイアウト
+    layout_main= [
+        [frame1,frame2]
+    ]
+    
+
+    #表示
+    return sg.Window('文字認識アプリ試作', layout_main, resizable=True)
+
+
+"""SUB_LAYOUT"""
+def sub_win():
+    frame3 = sg.Frame('',
+        [
+            [sg.Text('情シIDを入力してください', key='jousi')],
+            [sg.InputText(key='jo',size=(23))],
+            [sg.Button('OK', key='ok')]
+        ] , 
+    )
+
+    #全体レイアウト
+    layout_sub= [
+        [frame3]
+    ]
+
+    #表示
+    return sg.Window('認証', layout_sub, resizable=True)
+
+"""最初に表示するウィンドウ"""
+window=sub_win()
+
 #GUI表示実行部分
 while True:
-    # ウィンドウ表示
     event, value = window.read()
-#    up_image=value['input1']
-#    print(value['input1'])
-#    print(event,values)
-
-
-    #クローズボタンの処理
+    
     if event is None:
-#        print('exit')
         break
+    
+    if event == 'ok' and value['jo']=='':
+        sg.popup("正しい情シIDを入力してください")
         
-#        elif up_image or file_name:
-#            sg.popup(file_name,up_image)
+    if event == 'ok' and value['jo']:
+        window.close()
+        window=main_win()
+        ID=value['jo']
+#        print(value['jo'])
 
-#    print(value['input1']+6)
-#    elif event == 'upload' and file_name:
-#        import internal
-
+            
     if event == 'upload':
+        
+        # 保存先ディレクトリの指定
+        directory = "C:/Users/"+ID+"/Pictures"
+#        print(directory)
+        
+        # ファイルネームの指定
+        file_name = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name = os.path.join(directory, "{}.jpg".format(file_name))
+
+        #画像処理
         up_image=value['input1']
-        print(up_image)
         im2=cv2.imread(up_image)
-
-        #画像拡大し再保存
-        im2=cv2.resize(im2,dsize=None,fx=2.5,fy=2.5)
-        up_image=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_2")
+        im2=cv2.resize(im2,dsize=None,fx=2.5,fy=2.5)  #画像拡大
+        im2=cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)  #gray
+#        im2=cv2.Canny(im2, threshold1=10, threshold2=200)  #edge
+        up_image=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         up_image=os.path.join(directory,"{}.jpg".format(up_image))
         cv2.imwrite(up_image,im2)
-
-        #gray
-        im2=cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
-        up_image=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"+"_3")
-        up_image=os.path.join(directory,"{}.jpg".format(up_image))
-        cv2.imwrite(up_image,im2)
-
+#        print(im2)
+#        print(up_image)
 
         """以下文字認識"""
 
@@ -137,46 +134,49 @@ while True:
         #print(result)
         window["page1"].update(result)
         
+        #処理後の画像を消去
+#        time.sleep(5)
+        os.remove(up_image)
+        
         
     if event == 'deepl':
-        API_KEY="ceb16ca6-0983-dc86-ef57-0bde5bfb096f:fx"
-        # URLクエリに仕込むパラメータの辞書を作っておく
+        API_KEY="xxxxxxxxxx:fx" #使用時は固有のAPIキーを付ける
+            # URLクエリに仕込むパラメータの辞書作成
         params = {
             "auth_key": API_KEY,
-            "text": result.replace('-\n','').replace('\n',''),
+            "text": value['page1'],
             "source_lang": 'EN', # 入力テキストの言語
             "target_lang": 'JA'  # 出力テキストの言語
         }
         # パラメータと一緒にPOSTする
         request = requests.post("https://api-free.deepl.com/v2/translate", data=params)
-        result = request.json()
-        window["page2"].update(result)
-        #print(result)
+        translate = request.json()
+#        print(translate["translations"][0]["text"])
+        window["page2"].update(translate["translations"][0]["text"])
+#        print(result)
 
       
 
     if event == 'before':
         data1=value['page1']
-        # クリップボードへコピー
         pyperclip.copy(data1)
-#        print('クリップボードへコピーされたテキスト＝',data1)
         getdata1 = pyperclip.paste()
-#        print('クリップボードから取り出したテキスト＝',getdata1)
-        sg.popup("コピーしました")
+        window["copy1"].update("コピーしました")
 
     if event == 'after':
         data2=value['page2']
-        # クリップボードへコピー
         pyperclip.copy(data2)
-#        print('クリップボードへコピーされたテキスト＝',data2)
         getdata2 = pyperclip.paste()
-#        print('クリップボードから取り出したテキスト＝',getdata2)
-        sg.popup("コピーしました")
-
-
-        
+        window["copy2"].update("コピーしました")
    
 #print(up_image)   
 #print(event,value)
 
+
+        
+        
+
+
 window.close()
+
+
