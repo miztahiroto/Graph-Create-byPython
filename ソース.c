@@ -2,78 +2,135 @@
 #include <stdio.h>
 #include <string.h>
 
-struct schedule {
-    int year;        /* 年 */
-    int month;       /* 月 */
-    int day;         /* 日 */
-    int hour;        /* 時 */
-    char title[100]; /* 予定 */
-};
+#define MAX 10
 
-int main() {
-    struct schedule entry;
+/* テスト結果を降順に並べる関数
 
-	/*ファイル初期化*/
-	FILE* g = fopen("test.txt", "w");
-	fprintf(g, "");
-	fclose(g);
+void des(char *moji[256], int cnt[256]) {
+	char tmp[256];
+	for (int i = 1; i <= MAX; i++) {
+		for (int j = i+1; j <= MAX; j++) {
+			if (cnt[i] < cnt[j]) {
+//				char tmp = cnt[i];
+				//cnt[i] = cnt[j];
+				//cnt[j] = tmp;
 
 
-	/*ファイルに書き込み(max10行)*/
-	for(int i=1;i<=10;i++){
+				
+				strcpy(tmp, moji[i]);
+				printf("%s, \n", tmp);
 
-		FILE* h = fopen("test.txt", "a");
-
-		int input = 0;
-		printf("スケジュールを入力する場合は1を、しない場合は0を入力してください。");
-		(void)scanf("%d", &input);
-		if (input == 1) {
-
-			int year;
-			int month;
-			int hour;
-			int day;
-			char title[256];
-
-			printf("年を入力してください: ");
-			(void)scanf("%d", &year);
-			printf("月を入力してください: ");
-			(void)scanf("%d", &month);
-			printf("日を入力してください: ");
-			(void)scanf("%d", &day);
-			printf("時を入力してください: ");
-			(void)scanf("%d", &hour);
-			printf("タイトル入力してください: ");
-			(void)scanf("%s", &title);
-
-			entry.year = year;
-			entry.month = month;
-			entry.day = day;
-			entry.hour = hour;
-			strcpy(entry.title, title);
-
-			printf("%d : %04d/%02d/%02d %02d:00 %s\n\n",
-				i, entry.year, entry.month, entry.day, entry.hour, entry.title);
-
-			fprintf(h, "%d : %04d/%02d/%02d %02d:00 %s\n",
-				i, entry.year, entry.month, entry.day, entry.hour, entry.title);
-		}
-		fclose(h);
-
-		/*入力を終了するとき*/
-		if (input == 0 || i==10) {
-			printf("スケジュール入力を終了します。\n");
-			printf("書き込まれたスケジュールは下記です。\n\n");
-
-			FILE* f = fopen("test.txt", "r");
-
-			char line[256];
-			while (fgets(line, 256, f) != NULL) {
-				printf("%s", line);
+				strcpy(moji[i], moji[j]);
+//				printf("%s, \n", moji[i]);
+				
+				strcpy(moji[j], tmp);
+//				printf("%s, \n", moji[j]);
 			}
-			fclose(f);
-			break;
 		}
+//	printf("%d, \n",  cnt[i]);
+//	printf("%s, \n", moji[i]);
 	}
-    return 0;
+	for (int i = 0; i < MAX; ++i) {
+		printf("%d番目に短い文字列は、【%s】です。\n", i , moji[i]);
+	}
+
+	
+}
+*/
+
+void des(char moji[MAX][256],char tmp[256], int cnt[10]) {
+//	char tmp[256];
+	for (int i = 0; i < MAX; i++) {
+		for (int j = i + 1; j < MAX; j++) {
+			if (cnt[i] < cnt[j]) {
+				//				char tmp = cnt[i];
+								//cnt[i] = cnt[j];
+								//cnt[j] = tmp;
+
+
+
+				strcpy(tmp, moji[i]);
+				printf("%s, \n", tmp);
+
+				strcpy(moji[i], moji[j]);
+				//				printf("%s, \n", moji[i]);
+
+				strcpy(moji[j], tmp);
+				//				printf("%s, \n", moji[j]);
+			}
+		}
+		//	printf("%d, \n",  cnt[i]);
+		//	printf("%s, \n", moji[i]);
+	}
+
+	printf("入力文字列を文字数の多い順に並び変えます\n");
+	for (int i = 0; i < MAX; ++i) {
+		printf("%d. 文字数%d: 文字列%s\n", i+1,cnt[i], moji[i]);
+	}
+
+
+}
+
+/* ファイル処理
+int main() {
+	char moji[256];//1行に格納する文字
+	int *adr;//文字列のアドレス
+//	size_t cnt=0;
+//	int cnt2[MAX];
+
+
+
+	//キーボードから文字列を入力 
+	for (int i = 1; i <= MAX; i++) {
+		
+		printf("文字列%d:", i);
+
+
+		//配列の先頭アドレス
+		adr = &moji[i];
+		
+		//入力文字をアドレスの文字に入力
+		(void)scanf("%s", *moji);
+//		printf("a%s\n", moji);
+
+		printf("配列mojiの先頭のアドレスは，%p です\n", adr);
+		printf("adrのさしている値は，%d です\n", *adr);
+
+		adr += 1;    // pは，先頭から2つ先をさします 
+		printf("a[2]の中身は，%d です\n", *adr);
+
+
+//		moji[i] = arr;
+//		printf("b%s\n", *moji);
+
+//		cnt = strlen(moji[i]);
+//		printf("c%d\n", cnt[i]);
+//		cnt2[i] = (int)cnt;
+	}
+
+	//for (int i = 1; i <= MAX; ++i) {
+	//	printf("%d, %s\n",i, moji[i]);
+	//}
+
+	//des(moji, cnt);
+
+//	return 0;
+}
+*/
+
+int main(void) {
+	char moji[MAX][256];
+	char tmp[256];
+	int cnt[MAX];
+
+	//キーボードから文字列を入力 
+	for (int i = 0; i < MAX; i++) {
+		printf("文字列%d:", i+1);
+		//入力文字をアドレスの文字に入力
+		(void)scanf("%s", moji[i]);
+		//printf("a%s\n", moji);
+		cnt[i] = (int)strlen(moji[i]);
+	}
+
+	des(moji,tmp,cnt);
 }
