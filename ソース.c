@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#define _POSIX_SOURCE
+
 //char型でメモリ確保
 char* MallocChar(long size){
 	char* p;
@@ -37,14 +39,9 @@ int main(){
 //	FILE* fp = fopen("test.txt", "r");
 	int fd = open(file, O_RDONLY);
 
-	/*ファイルサイズの確認*/
 	size = GetFileSize(fd);
 	if (size <= 0){
 		printf("ファイルサイズを取得できませんでした。\n");
-	}
-	if (size > 0) {
-		printf("ファイルサイズは%dバイトです。\n\n", size);
-		printf("以下、ファイルの内容です。\n");
 	}
 
 	p = MallocChar(size);
@@ -52,13 +49,17 @@ int main(){
 		printf("メモリの確保に失敗しました。\n");
 	}
 
-	fread(p, size, 1, fp);
+	if (size > 0) {
+		printf("ファイルサイズは%dバイトです。\n\n", size);
+		printf("以下、ファイルの内容です。\n");
+		
+		fread(p, size, 1, fp);
 
-	fclose(fp);
-
-	//表示
-	Print(p, size);
-
+		//表示
+		Print(p, size);
+		
+		fclose(fp);
+	}
 	free(p);
 
 	return 0;
