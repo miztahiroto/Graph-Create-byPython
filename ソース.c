@@ -37,12 +37,7 @@ int main(){
 //	FILE* fp = fopen("test.txt", "r");
 	int fd = open(file, O_RDONLY);
 
-	//if (fp == NULL)	{
-//		char message[300];
-	//	snprintf(message, 300, "%sは存在しません。\n", file);
-	//	Quit(message);
-	//}
-
+	/*ファイルサイズの確認*/
 	size = GetFileSize(fd);
 	if (size <= 0){
 		printf("ファイルサイズを取得できませんでした。\n");
