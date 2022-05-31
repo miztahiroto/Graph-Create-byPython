@@ -133,7 +133,7 @@ namespace WpfApp2
                 fs.CopyTo(ms);      // FileStreamの内容をメモリストリームにコピーします。
             }
             file.Text = dlg.FileName;
-            System.Windows.MessageBox.Show(file.Text);
+ //           System.Windows.MessageBox.Show(file.Text);
 
             // ストリームの位置をリセット
             ms.Seek(0, SeekOrigin.Begin);
@@ -171,7 +171,7 @@ namespace WpfApp2
                 MyTextBlockGetColor_B.Background = b;
                 //                MyTextBlockGetColor.Text = c.ToString();
                 System.Drawing.Color ccolor = ColorTranslator.FromHtml(c.ToString());
-                MyTextBlockGetColor.Text = string.Format("{0:d} G:{1:d} B:{2:d}", ccolor.R, ccolor.G, ccolor.B);
+                MyTextBlockGetColor.Text = string.Format("{0:d},{1:d},{2:d}", ccolor.R, ccolor.G, ccolor.B);
                 //MyTextBlockGetColor_R.Text = string.Format("{0:d}", ccolor.R);
                 //MyTextBlockGetColor_G.Text = string.Format("{1:d}", ccolor.G);
                 //MyTextBlockGetColor_B.Text = string.Format("{2:d}", ccolor.B);
@@ -200,8 +200,18 @@ namespace WpfApp2
             int[] G = new int[40];
             int[] B = new int[40];
 
+            ColorMap colorMap = new ColorMap();
 
- //           System.Windows.MessageBox.Show(MyTextBlockGetColor.Text);
+            for (int i=-20; i<+20; i++) {
+                colorMap.OldColor = System.Drawing.Color.FromArgb(169 + i, 30 + i, 57 + i);  // opaque red
+                colorMap.NewColor = System.Drawing.Color.FromArgb(255, 0, 0, 255);  // opaque blue
+            
+                if (>255)
+                {
+                    = 255;
+                }
+            }                                                     
+            //           System.Windows.MessageBox.Show(MyTextBlockGetColor.Text);
 
             // bitmapクラスの画像pixel値を配列に挿入
             for (int i = 0; i < h; i++)
@@ -216,8 +226,8 @@ namespace WpfApp2
                     //}
 
                     // グレイスケール変換処理
-                    data[j, i] = (byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G)/3 );
-                    bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data[j, i], data[j, i], data[j, i]));
+                    //data[j, i] = (byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G)/3 );
+                    //bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data[j, i], data[j, i], data[j, i]));
 
                     //int r = int.Parse(MyTextBlockGetColor_R.Text);
                     //int g = int.Parse(MyTextBlockGetColor_G.Text);
