@@ -9,30 +9,26 @@
     <Grid>
         <Label Content="画像を選択" HorizontalAlignment="Left" Margin="35,24,0,0" VerticalAlignment="Top"/>
         <Button Content="Upload" HorizontalAlignment="Left" Margin="35,55,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_2"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="130,56,0,0" TextWrapping="Wrap" Text="画像URL" VerticalAlignment="Top" Width="120" TextChanged="TextBox_TextChanged"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="130,56,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" TextChanged="TextBox_TextChanged" x:Name="file"/>
         <Button Content="自動調整開始" HorizontalAlignment="Left" Margin="274,55,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_3"/>
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="1" Margin="16,94,0,0" VerticalAlignment="Top" Width="355"/>
-        <Label Content="手動画像調整" HorizontalAlignment="Left" Margin="35,106,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="41,170,0,0" VerticalAlignment="Top" Height="26" Width="75"/>
-        <Label Content="コントラスト" HorizontalAlignment="Left" Margin="41,144,0,0" VerticalAlignment="Top"/>
-        <Label Content="明度" HorizontalAlignment="Left" Margin="141,144,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="130,170,0,0" VerticalAlignment="Top" Width="75" Height="25"/>
-        <Label Content="彩度" HorizontalAlignment="Left" Margin="245,144,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="233,170,0,0" VerticalAlignment="Top" Height="25" Width="75"/>
-        <Label Content="調整結果" HorizontalAlignment="Left" Margin="35,210,0,0" VerticalAlignment="Top"/>
-        <Button Content="クリップボードにコピー" HorizontalAlignment="Left" Margin="41,468,0,0" VerticalAlignment="Top" Width="116" Click="Button_Click"/>
-        <Button Content="保存" HorizontalAlignment="Left" Margin="175,468,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="1" Margin="35,91,0,0" VerticalAlignment="Top" Width="497"/>
+        <Label Content="元画像" HorizontalAlignment="Left" Margin="41,176,0,0" VerticalAlignment="Top"/>
+        <Label Content="調整後画像" HorizontalAlignment="Left" Margin="279,176,0,0" VerticalAlignment="Top"/>
+        <Button Content="クリップボードにコピー" HorizontalAlignment="Left" Margin="41,416,0,0" VerticalAlignment="Top" Width="116" Click="Button_Click"/>
+        <Button Content="保存" HorizontalAlignment="Left" Margin="175,416,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
 
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="190" Margin="41,258,0,0" VerticalAlignment="Top" Width="209">
-            <Image HorizontalAlignment="Left" Height="190" VerticalAlignment="Top" Width="209" x:Name="test" Stretch="Uniform" Margin="-1"  />
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="190" Margin="41,207,0,0" VerticalAlignment="Top" Width="209">
+            <Image HorizontalAlignment="Left" Height="190" VerticalAlignment="Top" Width="209" x:Name="test" Stretch="Uniform" Margin="-1" MouseDown="test_MouseDown"  />
         </Border>
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="190" Margin="279,258,0,0" VerticalAlignment="Top" Width="209">
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="190" Margin="279,207,0,0" VerticalAlignment="Top" Width="209">
             <Image HorizontalAlignment="Left" Height="190"  VerticalAlignment="Top" Width="209" x:Name="test2" Stretch="Uniform" Margin="-1" />
         </Border>
-        <StackPanel HorizontalAlignment="Left" Height="76" Margin="308,170,0,0" VerticalAlignment="Top" Width="193">
-            <TextBlock Name="MyTextBlockColor" />
-            <TextBlock Name="MyTextBlockGetColor" Text=""/>
-            <TextBlock Name="MyTextBlockCursorLocation"/>
+        <StackPanel HorizontalAlignment="Left" Height="50" Margin="41,104,0,0" VerticalAlignment="Top" Width="194">
+            <TextBlock x:Name="MyTextBlockColor" />
+            <TextBlock x:Name="Text" Text="除去する色(クリック点)"/>
+            <TextBlock x:Name="MyTextBlockGetColor_R" Text=""/>
+            <TextBlock x:Name="MyTextBlockGetColor_G" Text=""/>
+            <TextBlock x:Name="MyTextBlockGetColor_B" Text=""/>
         </StackPanel>
     </Grid>
 </Window>

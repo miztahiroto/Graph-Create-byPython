@@ -34,7 +34,7 @@ namespace WpfApp2
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern short GetKeyState(int nVirtkey);
 
         WriteableBitmap m_processedBitmap = null;
-//        BitmapImage m_srcBitmap = null;
+        //        BitmapImage m_srcBitmap = null;
 
         public MainWindow()
         {
@@ -42,28 +42,31 @@ namespace WpfApp2
             //           test.Source = new BitmapImage(new Uri("C:/Users/RD56285/Documents/1_Dev/H2O/研修/C#演習/自由製作/WpfApp2/WpfApp2/test.png", UriKind.Relative));
             //           EnableDragDrop(image);
 
+            /*
             //タイマーの設定、一定時間ごとにマウスカーソルの状態を見る
             var timer = new DispatcherTimer(DispatcherPriority.Normal);
             //timer.Interval = new TimeSpan(100000);//ナノ秒
             timer.Interval = new TimeSpan(0, 0, 0, 0, 10);//10ミリ秒毎（0.01秒毎）
             timer.Start();
-            timer.Tick += Timer_Tick;
-
+//            timer.Tick += test_MouseDown;
+            */
+            
         }
 
+        /*
         //タイマーのTickイベント時
         private void Timer_Tick(object sender, EventArgs e)
         {
             System.Drawing.Point p = System.Windows.Forms.Cursor.Position;//マウスカーソル位置取得
             System.Windows.Media.Color c = GetPixelColor(p.X, p.Y);//マウスカーソル位置の色取得
             var b = new SolidColorBrush(c);
-            MyTextBlockColor.Background = b;
-            MyTextBlockColor.Text = c.ToString();
- //           MyTextBlockCursorLocation.Text = $"マウスの位置 = {System.Windows.Forms.Cursor.Position}";
+            //MyTextBlockColor.Background = b;
+            //MyTextBlockColor.Text = c.ToString();
+            //           MyTextBlockCursorLocation.Text = $"マウスの位置 = {System.Windows.Forms.Cursor.Position}";
 
             if (IsClickDown())
             {
-                
+
                 MyTextBlockGetColor.Background = b;
                 //                MyTextBlockGetColor.Text = c.ToString();
                 System.Drawing.Color ccolor = ColorTranslator.FromHtml(c.ToString());
@@ -71,6 +74,7 @@ namespace WpfApp2
 
             }
         }
+        */
 
         //クリック判定
         private bool IsClickDown()
@@ -98,14 +102,14 @@ namespace WpfApp2
             }
         }
 
-
+        
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-
+            
         }
 
+        
 
- 
 
 
         //画像選択
@@ -124,15 +128,18 @@ namespace WpfApp2
             // 選択したファイルをメモリにコピーする
             MemoryStream ms = new MemoryStream();
             using (FileStream fs = new FileStream(dlg.FileName, FileMode.Open))
+                
             {
                 fs.CopyTo(ms);      // FileStreamの内容をメモリストリームにコピーします。
             }
+            file.Text = dlg.FileName;
+            System.Windows.MessageBox.Show(file.Text);
 
             // ストリームの位置をリセット
             ms.Seek(0, SeekOrigin.Begin);
 
             // ストリームをもとにBitmapImageを作成
-            BitmapImage  bmp = new BitmapImage();
+            BitmapImage bmp = new BitmapImage();
             bmp.BeginInit();            // BitmapImage の初期化の開始を通知します。
             bmp.StreamSource = ms;      // BitmapImage のストリーム ソースを設定します。
             bmp.EndInit();              // BitmapImage の初期化の終了を通知します。
@@ -143,100 +150,107 @@ namespace WpfApp2
 
 
         }
-        
 
+        //画像内のクリックした点の色取得
+        private void test_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Drawing.Point p = System.Windows.Forms.Cursor.Position;//マウスカーソル位置取得
+            System.Windows.Media.Color c = GetPixelColor(p.X, p.Y);//マウスカーソル位置の色取得
+            var r = new SolidColorBrush(c);
+            var g = new SolidColorBrush(c);
+            var b = new SolidColorBrush(c);
+            //MyTextBlockColor.Background = b;
+            //MyTextBlockColor.Text = c.ToString();
+            //           MyTextBlockCursorLocation.Text = $"マウスの位置 = {System.Windows.Forms.Cursor.Position}";
+
+            if (IsClickDown())
+            {
+
+                MyTextBlockGetColor_R.Background = r;
+                MyTextBlockGetColor_G.Background = g;
+                MyTextBlockGetColor_B.Background = b;
+                //                MyTextBlockGetColor.Text = c.ToString();
+                System.Drawing.Color ccolor = ColorTranslator.FromHtml(c.ToString());
+ //               MyTextBlockGetColor_R.Text = string.Format("{0:d} G:{1:d} B:{2:d}", ccolor.R, ccolor.G, ccolor.B);
+                MyTextBlockGetColor_R.Text = string.Format("{0:d}", ccolor.R);
+                MyTextBlockGetColor_G.Text = string.Format("{1:d}", ccolor.G);
+                MyTextBlockGetColor_B.Text = string.Format("{2:d}", ccolor.B);
+            }
+        }
 
         //画像処理
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             WriteableBitmap m_processedBitmap_rev = m_processedBitmap;
 
+            /*
             if (m_processedBitmap_rev == null)
             {
                 System.Windows.MessageBox.Show("画像選択からやり直してください");
                 return;
             }
+            */
 
-            Bitmap bitmap = new Bitmap("C:/Users/RD56285/Pictures/2022-03-04 142747.png");
+            Bitmap bitmap = new Bitmap(file.Text);
             int w = bitmap.Width;
             int h = bitmap.Height;
             byte[,] data = new byte[w, h];
+
+            int[] R = new int[40];
+            int[] G = new int[40];
+            int[] B = new int[40];
+
+
+ //           System.Windows.MessageBox.Show(MyTextBlockGetColor.Text);
 
             // bitmapクラスの画像pixel値を配列に挿入
             for (int i = 0; i < h; i++)
             {
                 for (int j = 0; j < w; j++)
                 {
+                    //                   System.Drawing.Color ccolor = ColorTranslator.FromHtml(c.ToString());
+                    ////                   MyTextBlockGetColor.Text = string.Format("R:{0:d} G:{1:d} B:{2:d}", ccolor.R, ccolor.G, ccolor.B);
+                    //                   for (int a = (ccolor.R-20); a < h; a++) { 
+
+                    
+                    //}
+
                     // グレイスケール変換処理
-                    data[j, i] = (byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G) / 3);
+                    data[j, i] = (byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G)/3 );
                     bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data[j, i], data[j, i], data[j, i]));
+
+                    //int r = int.Parse(MyTextBlockGetColor_R.Text);
+                    //int g = int.Parse(MyTextBlockGetColor_G.Text);
+                    //int b = int.Parse(MyTextBlockGetColor_B.Text);
+
+                    int r = 230;
+                    int g = 230;
+                    int b = 230;
+
+                    //for (int a = (r - 20); a < (r + 20); a++) 
+                    //{
+                    //    for (int bb = (g - 20); bb < (g + 20); bb++)
+                    //    {
+                    //        for (int c = (b - 20); c < (b + 20); c++)
+                    //        {
+                    //            data[j, i] = 255;
+
+
+                    //        }
+                    //    }
+                    //}
+                    //bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data[j, i], data[j, i], data[j, i]));
                 }
             }
+ //           System.Drawing.Color pClr = System.Drawing.Color.FromArgb(200, 200, 200);
+            
 
             // 表示
             IntPtr hbitmap = bitmap.GetHbitmap();
             test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
- //           DeleteObject(hbitmap);
+            //           DeleteObject(hbitmap);
 
 
-            /*
-            System.Windows.Media.PixelFormat fmt = m_processedBitmap_rev.Format;
-            int channel = 3;
-            if (fmt == PixelFormats.Bgr32)
-            {
-                channel = 4;
-            }
-            else if (fmt == PixelFormats.Bgr24)
-            {
-                channel = 3;
-            }
-            else
-            {
-                MessageBox.Show("サポート外の画像フォーマットです");
-                return;
-            }
-            int width = m_processedBitmap_rev.PixelWidth;
-            int height = m_processedBitmap_rev.PixelHeight;
-            int stride = m_processedBitmap_rev.BackBufferStride;
-            int res = stride - channel * width;
-            m_processedBitmap_rev.Lock();
-            unsafe
-            {
-                byte* pBackBuffer =
-                    (byte*)(void*)m_processedBitmap_rev.BackBuffer;
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        byte b = pBackBuffer[0];
-                        byte g = pBackBuffer[1];
-                        byte r = pBackBuffer[2];
-
-                        int gray =
-                            (int)(0.3 * r + 0.59 * g + 0.11 * b);
-                        if (gray > 255)
-                        {
-                            gray = 255;
-                        }
-                        if (gray < 0)
-                        {
-                            gray = 0;
-                        }
-
-                        pBackBuffer[0] = (byte)gray;
-                        pBackBuffer[1] = (byte)gray;
-                        pBackBuffer[2] = (byte)gray;
-
-                        pBackBuffer += channel;
-                    }
-                    pBackBuffer += res;
-                }
-            }
-            m_processedBitmap_rev.AddDirtyRect(
-                new Int32Rect(0, 0, width, height));
-            m_processedBitmap_rev.Unlock();
-  //          test2.Source = m_processedBitmap_rev;
-            */
         }
 
         //「クリップボードにコピー」のボタンをクリックしたとき
@@ -264,74 +278,5 @@ namespace WpfApp2
 
         }
 
-     
-        /*
-private void Test2_MouseDown(object sender, MouseButtonEventArgs e)
-{
-   int X = e.Location.X;
-   int Y = e.Location.Y;
-
-   //マウスポインタを(0,0)へ
-   Cursor.Position = new Point(0, 0);
-
-   Bitmap bitmap = new Bitmap(pictureBox1.Image);
-
-   //クリック時のカーソル位置
-   Point pt = e.Location;
-
-   Color LC = new Color();
-   //pxCに座標の色を代入
-   Color pxC = bitmap.GetPixel(X, Y);
-   //LCにpxCの色を代入
-   LC = pxC;
-
-
-   int LR = LC.R;
-   int LG = LC.G;
-   int LB = LC.B;
-
-   numericUpDown1.Value = LR;
-   numericUpDown2.Value = LG;
-   numericUpDown3.Value = LB;
-
-}
-*/
     }
-
-       
-
-
-        //this.test.Source;
-        //          this.test.Source = bmp;
-    
-
-    /*
-    private void EnableDragDrop(Control control)
-    {
-        //ドラッグ＆ドロップを受け付けられるようにする
-        control.AllowDrop = true;
-
-        //ドラッグが開始された時のイベント処理（マウスカーソルをドラッグ中のアイコンに変更）
-        control.PreviewDragOver += (s, e) =>
-        {
-            //ファイルがドラッグされたとき、カーソルをドラッグ中のアイコンに変更し、そうでない場合は何もしない。
-            e.Effects = (e.Data.GetDataPresent(DataFormats.FileDrop)) ? DragDropEffects.Copy : e.Effects = DragDropEffects.None;
-            e.Handled = true;
-        };
-
-        //ドラッグ＆ドロップが完了した時の処理（ファイル名を取得し、ファイルの中身をTextプロパティに代入）
-        control.PreviewDrop += (s, e) =>
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) // ドロップされたものがファイルかどうか確認する。
-            {
-                string[] paths = ((string[])e.Data.GetData(DataFormats.FileDrop));
-                //--------------------------------------------------------------------
-                // ここに、ドラッグ＆ドロップ受付時の処理を記述する
-                //--------------------------------------------------------------------
-            }
-        };
-
-    }*/
-
-
 }
