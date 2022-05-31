@@ -171,10 +171,10 @@ namespace WpfApp2
                 MyTextBlockGetColor_B.Background = b;
                 //                MyTextBlockGetColor.Text = c.ToString();
                 System.Drawing.Color ccolor = ColorTranslator.FromHtml(c.ToString());
- //               MyTextBlockGetColor_R.Text = string.Format("{0:d} G:{1:d} B:{2:d}", ccolor.R, ccolor.G, ccolor.B);
-                MyTextBlockGetColor_R.Text = string.Format("{0:d}", ccolor.R);
-                MyTextBlockGetColor_G.Text = string.Format("{1:d}", ccolor.G);
-                MyTextBlockGetColor_B.Text = string.Format("{2:d}", ccolor.B);
+                MyTextBlockGetColor.Text = string.Format("{0:d} G:{1:d} B:{2:d}", ccolor.R, ccolor.G, ccolor.B);
+                //MyTextBlockGetColor_R.Text = string.Format("{0:d}", ccolor.R);
+                //MyTextBlockGetColor_G.Text = string.Format("{1:d}", ccolor.G);
+                //MyTextBlockGetColor_B.Text = string.Format("{2:d}", ccolor.B);
             }
         }
 
@@ -223,9 +223,9 @@ namespace WpfApp2
                     //int g = int.Parse(MyTextBlockGetColor_G.Text);
                     //int b = int.Parse(MyTextBlockGetColor_B.Text);
 
-                    int r = 230;
-                    int g = 230;
-                    int b = 230;
+                    //int r = 230;
+                    //int g = 230;
+                    //int b = 230;
 
                     //for (int a = (r - 20); a < (r + 20); a++) 
                     //{

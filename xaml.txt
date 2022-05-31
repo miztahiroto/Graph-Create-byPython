@@ -26,6 +26,7 @@
         <StackPanel HorizontalAlignment="Left" Height="50" Margin="41,104,0,0" VerticalAlignment="Top" Width="194">
             <TextBlock x:Name="MyTextBlockColor" />
             <TextBlock x:Name="Text" Text="除去する色(クリック点)"/>
+            <TextBlock x:Name="MyTextBlockGetColor" Text=""/>
             <TextBlock x:Name="MyTextBlockGetColor_R" Text=""/>
             <TextBlock x:Name="MyTextBlockGetColor_G" Text=""/>
             <TextBlock x:Name="MyTextBlockGetColor_B" Text=""/>
