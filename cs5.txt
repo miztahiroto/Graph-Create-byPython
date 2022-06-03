@@ -1,26 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+//using OpenCvSharp.WpfExtensions;
+using System.IO;       
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Drawing;
-using System.Drawing.Imaging;
-using OpenCvSharp;
-//using OpenCvSharp.WpfExtensions;
-using Microsoft.Win32;  // オープンファイル・ダイアログボックスで使用する。
-using System.IO;        // ファイル操作で使用する。
-using System.Windows.Forms;
-using System.Windows.Threading;//タイマー用
-using Color = System.Drawing.Color;
+
+
 
 namespace WpfApp2
 {
@@ -32,7 +19,8 @@ namespace WpfApp2
         //クリックされているか判定用
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern short GetKeyState(int nVirtkey);
 
-        
+
+
 
         public MainWindow()
         {
@@ -111,30 +99,40 @@ namespace WpfApp2
             System.Windows.Media.Color c = GetPixelColor(p.X, p.Y);//マウスカーソル位置の色取得
             var b = new SolidColorBrush(c);
             MyTextBlockColor.Background = b;
-            //MyTextBlockColor.Text = c.ToString();
+            MyTextBlockColor.Text = c.ToString();
             //MyTextBlockCursorLocation.Text = $"マウスの位置 = {System.Windows.Forms.Cursor.Position}";
 
             if (IsClickDown())
             {
                 System.Drawing.Color ccolor = ColorTranslator.FromHtml(c.ToString());
-                MyTextBlockGetColor.Text = string.Format("{0:d},{1:d},{2:d}", ccolor.R, ccolor.G, ccolor.B);
+                //MyTextBlockGetColor.Text = string.Format("{0:d},{1:d},{2:d}", ccolor.R, ccolor.G, ccolor.B);
                 MyTextBlockGetColor_R.Text = string.Format("{0:d}", ccolor.R);
                 MyTextBlockGetColor_G.Text = string.Format("{0:d}", ccolor.G);
                 MyTextBlockGetColor_B.Text = string.Format("{0:d}", ccolor.B);
             }
         }
 
-        //グレー
+        /*
+        //画像未選択の場合
+        private void Unselected()
+        {
+            if (test.Source == null || file.Text == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+        }
+        */
+
+        //グレースケール
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-
-
+            //画像未選択の場合
             if (test.Source == null)
             {
                 System.Windows.MessageBox.Show("画像選択からやり直してください");
                 return;
             }
-
 
             Bitmap bitmap = new Bitmap(file.Text);
             int w = bitmap.Width;
@@ -160,6 +158,13 @@ namespace WpfApp2
         //「クリップボードにコピー」のボタンをクリックしたとき
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            //保存画像がないとき
+            if (test2.Source == null)
+            {
+                System.Windows.MessageBox.Show("保存できる画像がありません");
+                return;
+            }
+
             System.Windows.Clipboard.SetData(System.Windows.DataFormats.Bitmap, test2.Source);
             System.Windows.IDataObject data = System.Windows.Clipboard.GetDataObject();
 
@@ -170,6 +175,13 @@ namespace WpfApp2
         //「保存」のボタンをクリックしたとき
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            //保存画像がないとき
+            if (test2.Source == null)
+            {
+                System.Windows.MessageBox.Show("保存できる画像がありません");
+                return;
+            }
+
             //画像を作成する
             ImageSource img = test2.Source;
             BitmapSource bmp = (BitmapSource)img;
@@ -214,6 +226,13 @@ namespace WpfApp2
         //ガンマ補正　ボタン処理
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
             //ガンマ補正をする画像
             Bitmap img = new Bitmap(file.Text);
             //ガンマ値を2.0にした画像を作成する
@@ -262,6 +281,13 @@ namespace WpfApp2
         //反転　ボタン処理
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
             Bitmap bitmap = new Bitmap(file.Text);
             // 縦横サイズを配列から読み取り
             int w = bitmap.Width;
@@ -330,6 +356,13 @@ namespace WpfApp2
         //コントラスト　ボタン処理
         private void Button_Click_6(object sender, RoutedEventArgs e)
         {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
             Bitmap bitmap = new Bitmap(file.Text);
             //コントラストを50にした画像を作成する
             System.Drawing.Bitmap newImg = (System.Drawing.Bitmap)AdjustContrast(bitmap, 50);
@@ -381,6 +414,13 @@ namespace WpfApp2
         //彩度　ボタン処理
         private void Button_Click_7(object sender, RoutedEventArgs e)
         {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
             //彩度を変更する画像
             Bitmap bitmap = new Bitmap(file.Text);
             //彩度を変更した画像を作成する
@@ -396,6 +436,13 @@ namespace WpfApp2
         //色抽出　ボタン処理
         private void Button_Click_8(object sender, RoutedEventArgs e)
         {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
             //色抜きする画像
             Bitmap bitmap = new Bitmap(file.Text);
             // 縦横サイズを配列から読み取り
@@ -420,48 +467,23 @@ namespace WpfApp2
                     data1[j, i] = (byte)((bitmap.GetPixel(j, i).R));
                     data2[j, i] = (byte)((bitmap.GetPixel(j, i).G));
                     data3[j, i] = (byte)((bitmap.GetPixel(j, i).B));
-                    /*
-                    //クリック点の周辺色を白色に変換
-                    for (int k= conv_R - 5;k<= conv_R+5;k++)
-                    {
-                        for (int l = conv_G - 5; l <= conv_G + 5; l++)
-                        {
-                            for (int m = conv_B - 5; m <= conv_B + 5; m++)
-                            {
-                                if (k == data1[j, i]  || l == data2[j, i] || m == data3[j, i])
-                                {
-                                    data1[j, i] = 255;
-                                    data2[j, i] = 255;
-                                    data3[j, i] = 255;
-                                }
-
-                            }
-                        }
-
-                    }*/
+                    
                     //クリック点の周辺色を白色に変換
                     for (int k = conv_R - 20; k <= conv_R + 20; k++)
                     {
                         int l = conv_G - 20;
                         int m = conv_B - 20;
-                        
-                        if (k >= data1[j, i] && l >=data2[j, i] && m >= data3[j, i])
+
+                        if (k == data1[j, i] || l == data2[j, i] || m == data3[j, i])
                         {
-                            data1[j, i] = 255; 
+                            data1[j, i] = 255;
                             data2[j, i] = 255;
                             data3[j, i] = 255;
                         }
                         l++;
                         m++;
                     }
-
-                    //Color someColor = Color.Blue; 
-                    //int changeColor=  someColor.ToArgb();
-                    //System.Windows.MessageBox.Show(changeColor.ToString());
                     bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data1[j, i], data2[j, i], data3[j, i]));
-
-                    //                   bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data1[j, i], data1[j, i], ((data1[j, i] + data2[j, i] + data3[j, i])/3)));
-
                 }
             }
 
