@@ -1,0 +1,47 @@
+<Window x:Class="WpfApp2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp2"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="800.62" Width="600.861">
+    <Grid>
+        <Label Content="画像を選択" HorizontalAlignment="Left" Margin="35,24,0,0" VerticalAlignment="Top"/>
+        <Button Content="Upload" HorizontalAlignment="Left" Margin="35,55,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_2"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="130,56,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="379"  x:Name="file"/>
+        <Button Content="グレースケール" HorizontalAlignment="Left" Margin="36,124,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_3"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="1" Margin="35,91,0,0" VerticalAlignment="Top" Width="497"/>
+        <Label Content="元画像" HorizontalAlignment="Left" Margin="41,201,0,0" VerticalAlignment="Top"/>
+        <Label Content="調整後画像" HorizontalAlignment="Left" Margin="279,201,0,0" VerticalAlignment="Top"/>
+        <Button Content="クリップボードにコピー" HorizontalAlignment="Left" Margin="279,427,0,0" VerticalAlignment="Top" Width="116" Click="Button_Click"/>
+        <Button Content="保存" HorizontalAlignment="Left" Margin="413,427,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="190" Margin="41,232,0,0" VerticalAlignment="Top" Width="230">
+            <Image HorizontalAlignment="Left" Height="190" VerticalAlignment="Top" Width="230" x:Name="test" Stretch="Uniform" Margin="-1" MouseDown="test_MouseDown"  />
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="190" Margin="279,232,0,0" VerticalAlignment="Top" Width="230" Name="Border1" ClipToBounds="True">
+            <Image HorizontalAlignment="Left" Height="190"  VerticalAlignment="Top" Width="230" x:Name="test2" Stretch="Uniform" Margin="-1" MouseWheel="test2_MouseWheel" MouseLeftButtonDown="test2_MouseLeftButtonDown" MouseMove="test2_MouseMove" MouseLeftButtonUp="test2_MouseLeftButtonUp"  />
+        </Border>
+        <StackPanel HorizontalAlignment="Left" Height="43" Margin="307,124,0,0" VerticalAlignment="Top" Width="225">
+            <TextBlock x:Name="Text" Text="除去する色(元画像内をクリックして色を指定)"/>
+            <TextBlock x:Name="MyTextBlockColor" Width="150" Margin="0,0,100,0"/>
+            <TextBlock x:Name="MyTextBlockGetColor" Text="" Height="12"/>
+            <TextBlock x:Name="MyTextBlockGetColor_R" Text="" Visibility="Collapsed"/>
+            <TextBlock x:Name="MyTextBlockGetColor_G" Text="" Visibility="Collapsed"/>
+            <TextBlock x:Name="MyTextBlockGetColor_B" Text="" Visibility="Collapsed"/>
+        </StackPanel>
+        <Button Content="ガンマ補正" HorizontalAlignment="Left" Margin="126,124,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click_4"/>
+        <Button Content="反転" HorizontalAlignment="Left" Margin="126,157,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_5"/>
+        <Button Content="コントラスト" HorizontalAlignment="Left" Margin="36,157,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_6"/>
+        <Button Content="彩度" HorizontalAlignment="Left" Margin="215,124,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_7"/>
+        <Button Content="色抜き" HorizontalAlignment="Left" Margin="215,157,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_8"/>
+        <Label Content="処理一覧" HorizontalAlignment="Left" Margin="35,98,0,0" VerticalAlignment="Top"/>
+
+        <Button Content="画像処理" HorizontalAlignment="Left" Margin="41,503,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_9"/>
+        <TextBox x:Name="TextBox" HorizontalAlignment="Left" Height="195" Margin="41,528,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="468" />
+        <Button Content="文字認識" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="125,503,0,0" Click="Button_Click_10"/>
+        <Label Content="画像内の文字起こし" HorizontalAlignment="Left" Margin="41,472,0,0" VerticalAlignment="Top"/>
+        <Button Content="クリップボードにコピー" HorizontalAlignment="Left" Margin="41,728,0,0" VerticalAlignment="Top" Width="108" Click="Button_Click_11"/>
+    </Grid>
+</Window>
