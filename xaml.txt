@@ -5,8 +5,107 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="824.12" Width="600.861">
-    <Grid>
+        Title="MainWindow" Height="800.287" Width="600.861">
+    <Grid Margin="0,0,0,-2">
+
+
+        <TabControl x:Name="MyTabControl" Margin="20,20,20,0" Height="702" VerticalAlignment="Top">
+            <TabItem Header="Upload">
+                <StackPanel Orientation="Vertical" Margin="10">
+                    <Label Content="画像を選択" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <StackPanel Orientation="Horizontal" Height="Auto" Margin="-1,-1,-1,-1" >
+                        <Button Content="Upload" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Upload"/>
+                        <TextBox Margin="10,0,80,0" Height="20" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="432"  x:Name="file"/>
+                    </StackPanel>
+                    <Button Content="クリップボードの画像を取得" Margin="0,5,100,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="182" Click="Button_Click_12"/>
+                    <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Left" Height="1" Margin="0,10,0,0" VerticalAlignment="Top" Width="517"/>
+
+                    <Label Content="画像処理" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Label Content="以下の画像から除去する色をクリックしてください" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <StackPanel Orientation="Horizontal" Height="Auto" >
+                        <Label Content="除去する色→" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <TextBlock x:Name="MyTextBlockColor" HorizontalAlignment="Left" VerticalAlignment="Top"  Height="26" Width="150" Text="ここに色が入力されます"/>
+                        <TextBlock x:Name="MyTextBlockGetColor" HorizontalAlignment="Left" VerticalAlignment="Top" Text="ここに色が入力されます" />
+                        <TextBlock x:Name="MyTextBlockGetColor_R" Text="" Visibility="Collapsed"/>
+                        <TextBlock x:Name="MyTextBlockGetColor_G" Text="" Visibility="Collapsed"/>
+                        <TextBlock x:Name="MyTextBlockGetColor_B" Text="" Visibility="Collapsed"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="Auto" >
+                        <Button Content="画像処理開始" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="Button_Click_9"/>
+                        <Button Margin="10,0,0,0" Content="処理リセット" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75"  Click="reset_button"/>
+                    </StackPanel>
+                    <Border Margin="0,5,0,0" BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="Auto" VerticalAlignment="Top" Width="517">
+                        <Image Height="386" VerticalAlignment="Top" x:Name="test" Stretch="Uniform" Margin="-1,-1,-20,-1" MouseDown="test_MouseDown"  />
+                    </Border>
+                    <StackPanel Orientation="Horizontal" Height="Auto" Margin="0,5,0,0">
+                        <Button Content="クリップボードにコピー" HorizontalAlignment="Left" VerticalAlignment="Top" Width="116" Click="Button_Click"/>
+                        <Button Margin="10,0,0,0" Content="保存" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+
+
+
+
+            <TabItem Header="文字認識">
+                <StackPanel Orientation="Vertical" Margin="10">
+                    <Label Content="画像処理タブ 処理後画像を使用し文字認識を実施します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Label Content="処理後の画像がない場合はUploadされた画像を使用します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <StackPanel Orientation="Horizontal" Height="Auto"  Margin="0,10,0,0" >
+                        <RadioButton Content="英語のみ" x:Name="radio1" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="True"/>
+                        <RadioButton Content="日本語含む" x:Name="radio2" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10,0,0,0" />
+                    </StackPanel>
+                    <Button Content="文字認識開始" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Click="Button_Click_3"/>
+                    <TextBox x:Name="TextBox" HorizontalAlignment="Left" Height="195" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="527" Margin="0,5,-20,0"/>
+                    <Button Content="クリップボードにコピー" HorizontalAlignment="Left" VerticalAlignment="Top" Width="108" Click="Button_Click_11"  Margin="0,5,0,0"/>
+                </StackPanel>
+
+            </TabItem>
+
+
+
+            <TabItem Header="翻訳">
+                <StackPanel Orientation="Vertical" Margin="10">
+                    <Label Content="文字認識の結果を使用し翻訳を実施します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Button Content="翻訳開始" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Click="Button_Click_13"/>
+                    <StackPanel Orientation="Horizontal" Height="Auto"  Margin="0,10,0,0" >
+                        <Label Content="文字認識結果" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <Label Content="翻訳結果" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="180,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="Auto"  Margin="0,10,-20,0" >
+                        <TextBox x:Name="ori" HorizontalAlignment="Left" Height="195" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="250" Margin="0,0,0,0"/>
+                        <TextBox x:Name="tra" HorizontalAlignment="Left" Height="195" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="250" Margin="15,0,0,0"/>
+                    </StackPanel>
+                    <Button Content="クリップボードにコピー" HorizontalAlignment="Left" VerticalAlignment="Top" Width="108" Click="Button_Click_11"  Margin="265,5,0,0"/>
+                </StackPanel>
+            </TabItem>
+
+
+
+            <TabItem Header="PDF→画像">
+                <StackPanel Orientation="Vertical" Margin="10">
+                    <Label Content="画像処理実施のためにPDFを画像に変換します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <StackPanel Orientation="Horizontal" Height="Auto" Margin="-1,-1,-1,-1">
+                        <Button Content="Upload" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="PDFUpload"/>
+                        <TextBox Margin="10,0,100,0" Height="20" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="436"  x:Name="PDFfile"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="Auto"  Margin="0,10,0,0" >
+                        <RadioButton Content="部分的に画像に変換" x:Name="partial" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="True"/>
+                        <TextBox Margin="10,0,100,0" Height="20" TextWrapping="Wrap" Text="例)1, 1-3等" VerticalAlignment="Top" Width="109"  />
+                    </StackPanel>
+                    <RadioButton Content="全ページ画像に変換" x:Name="all" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <Button Content="画像変換開始" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Click="Button_Click_14"/>
+                    <Label Content="※複数ページ変換する場合はページ毎に画像が保存される" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                </StackPanel>
+
+            </TabItem>
+
+
+
+        </TabControl>
+
+        <!--
         <Label Content="画像を選択" HorizontalAlignment="Left" Margin="35,24,0,0" VerticalAlignment="Top"/>
         <Button Content="Upload" HorizontalAlignment="Left" Margin="35,55,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_2"/>
         <TextBox HorizontalAlignment="Left" Height="23" Margin="130,56,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="379"  x:Name="file"/>
@@ -31,6 +130,8 @@
             <TextBlock x:Name="MyTextBlockGetColor_G" Text="" Visibility="Collapsed"/>
             <TextBlock x:Name="MyTextBlockGetColor_B" Text="" Visibility="Collapsed"/>
         </StackPanel>
+        -->
+
 
         <!--
         <Button Content="グレースケール" HorizontalAlignment="Left" Margin="36,124,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_3"/>
@@ -41,15 +142,18 @@
         <Button Content="色抜き" HorizontalAlignment="Left" Margin="215,157,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_8"/>
         <Label Content="処理一覧" HorizontalAlignment="Left" Margin="35,98,0,0" VerticalAlignment="Top"/>
 -->
+
+
+        <!--
         <Button Content="画像処理" HorizontalAlignment="Left" Margin="35,109,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_9"/>
         <Button Content="リセット" HorizontalAlignment="Left" Margin="149,109,0,0" VerticalAlignment="Top" Width="75" Click="reset_button"/>
         <TextBox x:Name="TextBox" HorizontalAlignment="Left" Height="195" Margin="36,520,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="468" />
-        <!--        <Label Content="画像内の文字起こし" HorizontalAlignment="Left" Margin="41,472,0,0" VerticalAlignment="Top"/>-->
         <Button Content="クリップボードにコピー" HorizontalAlignment="Left" Margin="36,720,0,0" VerticalAlignment="Top" Width="108" Click="Button_Click_11"/>
 
         <RadioButton Content="英語のみ" x:Name="radio1" HorizontalAlignment="Left" Margin="36,473,0,0" VerticalAlignment="Top" IsChecked="True"/>
         <RadioButton Content="日本語含む" x:Name="radio2" HorizontalAlignment="Left" Margin="109,473,0,0" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Height="23" Margin="35,441,0,0" TextWrapping="Wrap" Text="文字認識" VerticalAlignment="Top" Width="120" BorderBrush="White"/>
         <Button Content="翻訳開始" HorizontalAlignment="Left" Margin="36,495,0,0" VerticalAlignment="Top" Width="108" Click="Button_Click_3"/>
+-->
     </Grid>
 </Window>
