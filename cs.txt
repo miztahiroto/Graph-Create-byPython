@@ -6,7 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Drawing.Drawing2D;
-using Aspose.Pdf.Facades;
+using System.Windows.Forms;
 using Aspose.Pdf;
 using Aspose.Pdf.Devices;
 
@@ -19,8 +19,7 @@ namespace WpfApp2
     {
         //クリックされているか判定用
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern short GetKeyState(int nVirtkey);
-
-        BitmapImage m_bitmap = null;    // 読み込んだ画像用
+        
 
         public MainWindow()
         {
@@ -58,7 +57,7 @@ namespace WpfApp2
         //画像選択
         private void Upload(object sender, RoutedEventArgs e)
         {
-            if (file.Text != null)
+            if (test.Source != null)
             {
                 reset();
             }
@@ -306,13 +305,13 @@ namespace WpfApp2
             //保存画像がないとき
             if (test.Source == null)
             {
-                System.Windows.MessageBox.Show("保存できる画像がありません");
+                AutoClosingMessageBox.Show("保存できる画像がありません", "エラー", 2000);
                 return;
             }
 
             System.Windows.Clipboard.SetData(System.Windows.DataFormats.Bitmap, test.Source);
             System.Windows.IDataObject data = System.Windows.Clipboard.GetDataObject();
-            System.Windows.MessageBox.Show("保存しました");
+            AutoClosingMessageBox.Show("保存しました", "保存", 2000);
 
         }
 
@@ -322,7 +321,7 @@ namespace WpfApp2
             //保存画像がないとき
             if (test.Source == null)
             {
-                System.Windows.MessageBox.Show("保存できる画像がありません");
+                AutoClosingMessageBox.Show("保存できる画像がありません", "エラー", 2000);
                 return;
             }
 
@@ -340,7 +339,7 @@ namespace WpfApp2
                 PngBitmapEncoder encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(bmp));
                 encoder.Save(stream);
-                System.Windows.MessageBox.Show("保存しました");
+                AutoClosingMessageBox.Show("保存しました", "保存", 2000);
             }
         }
 
@@ -394,7 +393,7 @@ namespace WpfApp2
             string data = TextBox.Text;
             System.Windows.Clipboard.SetText(data);
             //           System.Windows.IDataObject data1 = System.Windows.Clipboard.GetDataObject();
-            System.Windows.MessageBox.Show("保存しました");
+            AutoClosingMessageBox.Show("保存しました", "保存", 2000);
         }
 
         private void test_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -453,7 +452,7 @@ namespace WpfApp2
         //画像リセット
         private void reset()
         {
-            /*
+            
             if (test.Source != null)
             {
                 test.Source = null;
@@ -462,19 +461,13 @@ namespace WpfApp2
             {
                 TextBox.Text = null;
             }
-            */
-            // BitmapImageにファイルから画像を読み込む
-            Uri imageUri = new Uri(file.Text, UriKind.Relative);
-            BitmapImage imageBitmap = new BitmapImage(imageUri);
-            test.Source = imageBitmap;
-
-            //            test.Source = file.Text;
+            
         }
 
         //処理リセット　ボタン処理
         private void reset_button(object sender, RoutedEventArgs e)
         {
-            reset();
+            test.Source = new BitmapImage(new Uri(file.Text));
         }
 
         private void True(object sender, RoutedEventArgs e)
@@ -485,9 +478,9 @@ namespace WpfApp2
         //クリップボードの画像を代入
         private void Button_Click_12(object sender, RoutedEventArgs e)
         {
-            if (Clipboard.ContainsImage())
+            if (System.Windows.Clipboard.ContainsImage())
             {
-                test.Source = Clipboard.GetImage();
+                test.Source = System.Windows.Clipboard.GetImage();
             }
             else
             {
@@ -504,7 +497,7 @@ namespace WpfApp2
             {
                 _caption = caption;
                 _timeoutTimer = new System.Threading.Timer(OnTimerElapsed, null, timeout, System.Threading.Timeout.Infinite);
-                MessageBox.Show(text, caption);
+                System.Windows.MessageBox.Show(text, caption);
             }
             public static void Show(string text, string caption, int timeout)
             {
@@ -532,42 +525,46 @@ namespace WpfApp2
 
         }
 
-        private void Button_Click_14(object sender, RoutedEventArgs e)
-        {
-            Document pdfDocument = new Document("Document.pdf");
-            // 各ページをループする
-            foreach (var page in pdfDocument.Pages)
-            {
-                // 出力画像のファイルストリームを作成します
-                using (FileStream imageStream = new FileStream(string.Format("page_{0}.png", page.Number), FileMode.Create))
-                {
-                    // 解決オブジェクトの作成
-                    Resolution resolution = new Resolution(300);
 
-                    // 指定された属性でPngデバイスを作成する
-                    // 幅、高さ、解像度
-                    PngDevice PngDevice = new PngDevice(500, 700, resolution);
-
-                    // 特定のページを変換し、画像を保存してストリーミングする
-                    PngDevice.Process(page, imageStream);
-
-                    // ストリームを閉じる
-                    imageStream.Close();
-                }
-            }
-
-
-        }
 
         private void PDFUpload(object sender, RoutedEventArgs e)
         {
+            // オープンファイル・ダイアログボックスを設定
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.Filter = "PDF|*.pdf";  // 左記拡張子のみフォロー
+            
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.ShowDialog();
+            PDFfile.Text = ofd.FileName;
+        }
+
+        private void Button_Click_14(object sender, RoutedEventArgs e)
+        {
+
+            Document pdfDocument = new Document(PDFfile.Text);
+
+            foreach (var page in pdfDocument.Pages)
+            {
+                // Define Resolution
+                Resolution resolution = new Resolution(300);
+
+                // Create Jpeg device with specified attributes
+                // Width, Height, Resolution
+                int w = pdfDocument.GetWidth;
+                int h = pdfDocument.Height;
+                JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
+
+                // Convert a particular page and save the image to stream
+                JpegDevice.Process(pdfDocument.Pages[page.Number], "C:/Users/rd56285/Desktop/課題業績用ツール/1.文字認識Ver2(PDF→画像変換追加)/sample/image" + page.Number + "_out" + ".Jpg");
+            }
+            
 
         }
 
         //各種処理中表示
         private void Processing()
         {
-
+            AutoClosingMessageBox.Show("処理中…", "処理中", 2000);
         }
 
 
