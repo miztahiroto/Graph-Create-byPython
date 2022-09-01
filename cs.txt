@@ -127,8 +127,20 @@ namespace WpfApp2
                 return;
             }
 
+
+
+
             //処理する画像
+            //           if (file.Text!=null)
+            //           {
             Bitmap bitmap = new Bitmap(file.Text);
+ //           }
+ //           else
+ //           {
+ //               Bitmap bitmap = new Bitmap(System.Windows.Clipboard.GetFileDropList());
+ //           }
+
+            
 
             //処理後の画像
             Bitmap newImg = null;
@@ -305,13 +317,13 @@ namespace WpfApp2
             //保存画像がないとき
             if (test.Source == null)
             {
-                AutoClosingMessageBox.Show("保存できる画像がありません", "エラー", 2000);
+                AutoClosingMessageBox.Show("コピーできる画像がありません", "エラー", 2000);
                 return;
             }
 
             System.Windows.Clipboard.SetData(System.Windows.DataFormats.Bitmap, test.Source);
             System.Windows.IDataObject data = System.Windows.Clipboard.GetDataObject();
-            AutoClosingMessageBox.Show("保存しました", "保存", 2000);
+            AutoClosingMessageBox.Show("コピーしました", "コピー", 2000);
 
         }
 
@@ -467,7 +479,23 @@ namespace WpfApp2
         //処理リセット　ボタン処理
         private void reset_button(object sender, RoutedEventArgs e)
         {
-            test.Source = new BitmapImage(new Uri(file.Text));
+            
+            if (file.Text==null)
+            {
+                test.Source = System.Windows.Clipboard.GetImage();
+
+            }
+            else if(file.Text != null)
+            {
+                System.Windows.MessageBox.Show(file.Text);
+
+                test.Source = new BitmapImage(new Uri(file.Text));
+            }
+            else
+            {
+                test.Source = null;
+                file.Text = null;;
+            }
         }
 
         private void True(object sender, RoutedEventArgs e)
@@ -481,6 +509,7 @@ namespace WpfApp2
             if (System.Windows.Clipboard.ContainsImage())
             {
                 test.Source = System.Windows.Clipboard.GetImage();
+
             }
             else
             {
@@ -550,8 +579,9 @@ namespace WpfApp2
 
                 // Create Jpeg device with specified attributes
                 // Width, Height, Resolution
-                int w = pdfDocument.GetWidth;
-                int h = pdfDocument.Height;
+ //               int w = pdfDocument.GetWidth(); 
+
+//                int h = pdfDocument.Height;
                 JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
 
                 // Convert a particular page and save the image to stream
