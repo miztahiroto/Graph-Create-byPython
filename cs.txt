@@ -296,10 +296,15 @@ namespace WpfApp2
             BitmapSource bmp = (BitmapSource)img;
 
             //保存場所の指定
-            string directory = Path.GetDirectoryName(file.Text);
+            string username = Environment.UserName;
+            string directory = @"C:/Users/"+username+"/Pictures/image";
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
             string directory_rev = directory + "/tmp_save.png";
 
-            // BitmapSourceを保存する
+            //保存
             using (Stream stream = new FileStream(directory_rev, FileMode.Create))
             {
                 PngBitmapEncoder encoder = new PngBitmapEncoder();
@@ -342,6 +347,27 @@ namespace WpfApp2
             BitmapSource bmp = (BitmapSource)img;
 
             //保存場所の指定
+            // SaveFileDialogを表示
+            string username = Environment.UserName;
+            var dialog = new SaveFileDialog();
+            dialog.Filter = "画像|*.jpg;*.jpeg;*.png;*.bmp";
+
+            DialogResult dr = saveFileDialog1.ShowDialog();
+            if (dr == System.Windows.Forms.DialogResult.OK)
+            {
+                textBox1.Text = saveFileDialog1.FileName;
+            }
+
+            // 保存ボタン以外が押下された場合
+            if (!result)
+            {
+                // 終了します。
+                return;
+            }
+
+            // @"C:/Users/" + username + "/Pictures";
+
+/*
             string directory = Path.GetDirectoryName(file.Text);
             directory = directory + "/save.png";
 
@@ -353,6 +379,7 @@ namespace WpfApp2
                 encoder.Save(stream);
                 AutoClosingMessageBox.Show("保存しました", "保存", 2000);
             }
+*/
         }
 
         //文字認識 内部処理
@@ -370,10 +397,10 @@ namespace WpfApp2
             string directory_rev = directory + "/tmp_save.png";
 
             Tesseract.TesseractEngine tesseOCR = new Tesseract.TesseractEngine(datapath, lang);
-            Tesseract.Pix image = Tesseract.Pix.LoadFromFile(directory_rev);// Ver3ではなかった
+            Tesseract.Pix image = Tesseract.Pix.LoadFromFile(directory_rev);
 
-            Tesseract.Page page = tesseOCR.Process(image);//ver3ではBitmapを引数に渡せた
-                                                          // OCR結果を取得
+            Tesseract.Page page = tesseOCR.Process(image);
+                                                          
             string result = page.GetText();
             TextBox.Text = result;
 
@@ -509,7 +536,7 @@ namespace WpfApp2
             if (System.Windows.Clipboard.ContainsImage())
             {
                 test.Source = System.Windows.Clipboard.GetImage();
-
+                TempSave();
             }
             else
             {
