@@ -9,6 +9,9 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Aspose.Pdf;
 using Aspose.Pdf.Devices;
+using Microsoft.Win32;
+using System.Xml.Linq;
+using System.Text;
 
 namespace WpfApp2
 {
@@ -19,7 +22,7 @@ namespace WpfApp2
     {
         //クリックされているか判定用
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern short GetKeyState(int nVirtkey);
-        
+
 
         public MainWindow()
         {
@@ -53,7 +56,7 @@ namespace WpfApp2
             }
         }
 
-//------------Uploadタブ------------
+        //------------Uploadタブ------------
         //画像選択
         private void Upload(object sender, RoutedEventArgs e)
         {
@@ -92,7 +95,7 @@ namespace WpfApp2
 
             // BitmapImageをSourceに指定して画面に表示する
             test.Source = new WriteableBitmap(bmp);
-//            test2.Source = new WriteableBitmap(bmp);
+            //            test2.Source = new WriteableBitmap(bmp);
 
         }
 
@@ -134,13 +137,13 @@ namespace WpfApp2
             //           if (file.Text!=null)
             //           {
             Bitmap bitmap = new Bitmap(file.Text);
- //           }
- //           else
- //           {
- //               Bitmap bitmap = new Bitmap(System.Windows.Clipboard.GetFileDropList());
- //           }
+            //           }
+            //           else
+            //           {
+            //               Bitmap bitmap = new Bitmap(System.Windows.Clipboard.GetFileDropList());
+            //           }
 
-            
+
 
             //処理後の画像
             Bitmap newImg = null;
@@ -297,7 +300,7 @@ namespace WpfApp2
 
             //保存場所の指定
             string username = Environment.UserName;
-            string directory = @"C:/Users/"+username+"/Pictures/image";
+            string directory = @"C:/Users/" + username + "/Pictures/image";
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -342,16 +345,99 @@ namespace WpfApp2
                 return;
             }
 
-            //画像を作成する
+            //保存先確保
+            string username = Environment.UserName;
+            string directory = @"C:/Users/" + username + "/Pictures/image";
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            //画像を作成
             ImageSource img = test.Source;
             BitmapSource bmp = (BitmapSource)img;
 
             //保存場所の指定
             // SaveFileDialogを表示
-            string username = Environment.UserName;
-            var dialog = new SaveFileDialog();
-            dialog.Filter = "画像|*.jpg;*.jpeg;*.png;*.bmp";
+            
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
+            dlg.AddExtension = true; //自動的に拡張子を付ける
+            dlg.CheckFileExists = false; //存在しないファイルを指定したときに警告する
+            dlg.CheckPathExists = true; //存在しないパスを指定したときに警告する
+            dlg.CreatePrompt = false; //存在しないファイルを指定したときに作成の許可を求める
+            dlg.DefaultExt = ".png"; //ダイアログに表示するファイルの拡張子。規定値はEmpty。
+            dlg.DereferenceLinks = false; // ショートカットが参照先を返す場合はtrue。リンクファイルを返す場合はfalse。規定値はfalse。
+            dlg.FileName = "image"; // 選択されたファイルのフルパス。
+            dlg.Filter = "png(*.png)|*.png|bmp(*.bmp)|*.bmp|jpeg(*.jpg,*.jpeg)|*.jpg";
+            dlg.FilterIndex = 1 ; // 選択されたFilterのインデックス。規定値は1。
+            dlg.InitialDirectory = @"C:\Users\sg_5v\Pictures\image"; // ダイアログの初期ディレクトリ。規定値はEmpty。
+            dlg.OverwritePrompt = true; // 存在するファイルを指定したときに、警告するか。規定値はtrue。
+            dlg.Title = "保存するファイル名を入力してください。"; // ダイアログのタイトル。
+            dlg.ValidateNames = true; // ファイル名がWin32に適合するか検査するかどうか。規定値はfalse。
+
+            Nullable<bool> result = dlg.ShowDialog();
+            
+            if (result == true)
+            {
+                string imagefile = dlg.FileName;  //指定されたファイルのパス取得
+                System.Windows.MessageBox.Show(imagefile);
+
+                //画像を作成する
+                ImageSource str_img = test.Source;
+                BitmapSource str_bmp = (BitmapSource)img;
+                using (Stream stream = new FileStream(@"C:\Users\sg_5v\Pictures\image\image.png", FileMode.Create))
+                {
+                    PngBitmapEncoder encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bmp));
+                    encoder.Save(stream);
+                }
+
+
+                switch (imagefile.ToUpper())
+                {
+                    case ".PNG":
+                        using (Stream stream = new FileStream(@"C:\Users\sg_5v\Pictures\image\image.png", FileMode.Create))
+                        {
+                            PngBitmapEncoder encoder = new PngBitmapEncoder();
+                            encoder.Frames.Add(BitmapFrame.Create(bmp));
+                            encoder.Save(stream);
+                        }
+                        break;
+                        /*
+                    case ".JPEG":
+                        // ★★★PictureBoxのイメージをJPEG形式で保存する★★★
+                        pictureBox1.Image.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        break;
+                    case ".PNG":
+                        // ★★★PictureBoxのイメージをGIF形式で保存する★★★
+                        pictureBox1.Image.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        break;
+                        */
+                }
+
+                
+
+                
+                
+
+
+
+
+
+            }
+
+            // 保存ボタン以外が押下された場合
+            if (result != true)
+            {
+                // 終了します。
+                return;
+            }
+
+
+
+
+            /*
             DialogResult dr = saveFileDialog1.ShowDialog();
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
@@ -366,20 +452,20 @@ namespace WpfApp2
             }
 
             // @"C:/Users/" + username + "/Pictures";
+            */
+            /*
+                        string directory = Path.GetDirectoryName(file.Text);
+                        directory = directory + "/save.png";
 
-/*
-            string directory = Path.GetDirectoryName(file.Text);
-            directory = directory + "/save.png";
-
-            // BitmapSourceを保存する
-            using (Stream stream = new FileStream(directory, FileMode.Create))
-            {
-                PngBitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bmp));
-                encoder.Save(stream);
-                AutoClosingMessageBox.Show("保存しました", "保存", 2000);
-            }
-*/
+                        // BitmapSourceを保存する
+                        using (Stream stream = new FileStream(directory, FileMode.Create))
+                        {
+                            PngBitmapEncoder encoder = new PngBitmapEncoder();
+                            encoder.Frames.Add(BitmapFrame.Create(bmp));
+                            encoder.Save(stream);
+                            AutoClosingMessageBox.Show("保存しました", "保存", 2000);
+                        }
+            */
         }
 
         //文字認識 内部処理
@@ -400,7 +486,7 @@ namespace WpfApp2
             Tesseract.Pix image = Tesseract.Pix.LoadFromFile(directory_rev);
 
             Tesseract.Page page = tesseOCR.Process(image);
-                                                          
+
             string result = page.GetText();
             TextBox.Text = result;
 
@@ -412,7 +498,8 @@ namespace WpfApp2
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             //英語のみ
-            if (radio1.IsChecked == true){
+            if (radio1.IsChecked == true)
+            {
                 string lang = "eng";
                 moji(lang);
             }
@@ -491,7 +578,7 @@ namespace WpfApp2
         //画像リセット
         private void reset()
         {
-            
+
             if (test.Source != null)
             {
                 test.Source = null;
@@ -500,19 +587,19 @@ namespace WpfApp2
             {
                 TextBox.Text = null;
             }
-            
+
         }
 
         //処理リセット　ボタン処理
         private void reset_button(object sender, RoutedEventArgs e)
         {
-            
-            if (file.Text==null)
+
+            if (file.Text == null)
             {
                 test.Source = System.Windows.Clipboard.GetImage();
 
             }
-            else if(file.Text != null)
+            else if (file.Text != null)
             {
                 System.Windows.MessageBox.Show(file.Text);
 
@@ -521,7 +608,7 @@ namespace WpfApp2
             else
             {
                 test.Source = null;
-                file.Text = null;;
+                file.Text = null; ;
             }
         }
 
@@ -540,7 +627,7 @@ namespace WpfApp2
             }
             else
             {
-                AutoClosingMessageBox.Show("画像がありません","エラー",2000);
+                AutoClosingMessageBox.Show("画像がありません", "エラー", 2000);
             }
         }
 
@@ -588,15 +675,14 @@ namespace WpfApp2
             // オープンファイル・ダイアログボックスを設定
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.Filter = "PDF|*.pdf";  // 左記拡張子のみフォロー
-            
-            OpenFileDialog ofd = new OpenFileDialog();
+
+            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
             ofd.ShowDialog();
             PDFfile.Text = ofd.FileName;
         }
 
         private void Button_Click_14(object sender, RoutedEventArgs e)
         {
-
             Document pdfDocument = new Document(PDFfile.Text);
 
             foreach (var page in pdfDocument.Pages)
@@ -606,15 +692,15 @@ namespace WpfApp2
 
                 // Create Jpeg device with specified attributes
                 // Width, Height, Resolution
- //               int w = pdfDocument.GetWidth(); 
+                //               int w = pdfDocument.GetWidth(); 
 
-//                int h = pdfDocument.Height;
+                //                int h = pdfDocument.Height;
                 JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
 
                 // Convert a particular page and save the image to stream
                 JpegDevice.Process(pdfDocument.Pages[page.Number], "C:/Users/rd56285/Desktop/課題業績用ツール/1.文字認識Ver2(PDF→画像変換追加)/sample/image" + page.Number + "_out" + ".Jpg");
             }
-            
+
 
         }
 
