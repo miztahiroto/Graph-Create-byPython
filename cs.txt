@@ -27,6 +27,8 @@ namespace WpfApp2
         public MainWindow()
         {
             InitializeComponent();
+
+            
         }
 
 
@@ -347,7 +349,7 @@ namespace WpfApp2
 
             //保存先確保
             string username = Environment.UserName;
-            string directory = @"C:/Users/" + username + "/Pictures/image";
+            string directory = "C:\\Users\\" + username + "\\Pictures\\image";
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -369,9 +371,9 @@ namespace WpfApp2
             dlg.DefaultExt = ".png"; //ダイアログに表示するファイルの拡張子。規定値はEmpty。
             dlg.DereferenceLinks = false; // ショートカットが参照先を返す場合はtrue。リンクファイルを返す場合はfalse。規定値はfalse。
             dlg.FileName = "image"; // 選択されたファイルのフルパス。
-            dlg.Filter = "png(*.png)|*.png|bmp(*.bmp)|*.bmp|jpeg(*.jpg,*.jpeg)|*.jpg";
+            dlg.Filter = "png(*.png)|*.png|bmp(*.bmp)|*.bmp|jpeg(*.jpeg)|*.jpeg";
             dlg.FilterIndex = 1 ; // 選択されたFilterのインデックス。規定値は1。
-            dlg.InitialDirectory = @"C:\Users\sg_5v\Pictures\image"; // ダイアログの初期ディレクトリ。規定値はEmpty。
+            dlg.InitialDirectory = directory; // ダイアログの初期ディレクトリ。規定値はEmpty。
             dlg.OverwritePrompt = true; // 存在するファイルを指定したときに、警告するか。規定値はtrue。
             dlg.Title = "保存するファイル名を入力してください。"; // ダイアログのタイトル。
             dlg.ValidateNames = true; // ファイル名がWin32に適合するか検査するかどうか。規定値はfalse。
@@ -381,39 +383,40 @@ namespace WpfApp2
             if (result == true)
             {
                 string imagefile = dlg.FileName;  //指定されたファイルのパス取得
-                System.Windows.MessageBox.Show(imagefile);
-
+                
+                string fileExt = System.IO.Path.GetExtension(imagefile);
+//                System.Windows.MessageBox.Show(fileExt);
                 //画像を作成する
                 ImageSource str_img = test.Source;
                 BitmapSource str_bmp = (BitmapSource)img;
-                using (Stream stream = new FileStream(@"C:\Users\sg_5v\Pictures\image\image.png", FileMode.Create))
-                {
-                    PngBitmapEncoder encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bmp));
-                    encoder.Save(stream);
-                }
 
-
-                switch (imagefile.ToUpper())
+                switch (fileExt)
                 {
-                    case ".PNG":
-                        using (Stream stream = new FileStream(@"C:\Users\sg_5v\Pictures\image\image.png", FileMode.Create))
+                    case ".png":
+                        using (Stream stream = new FileStream(directory + "/image.png", FileMode.Create))
                         {
                             PngBitmapEncoder encoder = new PngBitmapEncoder();
                             encoder.Frames.Add(BitmapFrame.Create(bmp));
                             encoder.Save(stream);
                         }
                         break;
-                        /*
-                    case ".JPEG":
-                        // ★★★PictureBoxのイメージをJPEG形式で保存する★★★
-                        pictureBox1.Image.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        
+                    case ".jpeg":
+                        using (Stream stream = new FileStream(directory + "/image.jpeg", FileMode.Create))
+                        {
+                            PngBitmapEncoder encoder = new PngBitmapEncoder();
+                            encoder.Frames.Add(BitmapFrame.Create(bmp));
+                            encoder.Save(stream);
+                        }
                         break;
-                    case ".PNG":
-                        // ★★★PictureBoxのイメージをGIF形式で保存する★★★
-                        pictureBox1.Image.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    case ".bmp":
+                        using (Stream stream = new FileStream(directory + "/image.bmp", FileMode.Create))
+                        {
+                            PngBitmapEncoder encoder = new PngBitmapEncoder();
+                            encoder.Frames.Add(BitmapFrame.Create(bmp));
+                            encoder.Save(stream);
+                        }
                         break;
-                        */
                 }
 
                 
@@ -683,22 +686,47 @@ namespace WpfApp2
 
         private void Button_Click_14(object sender, RoutedEventArgs e)
         {
+            string username = Environment.UserName;
+            string directory = "C:\\Users\\" + username + "\\Pictures\\image";
             Document pdfDocument = new Document(PDFfile.Text);
+            int N, M = 0;
 
-            foreach (var page in pdfDocument.Pages)
+            if (all.IsChecked == true)
             {
-                // Define Resolution
-                Resolution resolution = new Resolution(300);
+                foreach (var page in pdfDocument.Pages)
+                {
+                    // Define Resolution
+                    Resolution resolution = new Resolution(300);
 
-                // Create Jpeg device with specified attributes
-                // Width, Height, Resolution
-                //               int w = pdfDocument.GetWidth(); 
+                    // Create Jpeg device with specified attributes
+                    // Width, Height, Resolution
+                    //               int w = pdfDocument.GetWidth(); 
 
-                //                int h = pdfDocument.Height;
-                JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
+                    //                int h = pdfDocument.Height;
+                    JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
 
-                // Convert a particular page and save the image to stream
-                JpegDevice.Process(pdfDocument.Pages[page.Number], "C:/Users/rd56285/Desktop/課題業績用ツール/1.文字認識Ver2(PDF→画像変換追加)/sample/image" + page.Number + "_out" + ".Jpg");
+                    // Convert a particular page and save the image to stream
+                    JpegDevice.Process(pdfDocument.Pages[page.Number], directory + page.Number + "_out" + ".jpeg");
+                }
+            }
+
+            if (partial.IsChecked == true)
+            {
+                foreach (var page in pdfDocument.Pages)
+                {
+                    // Define Resolution
+                    Resolution resolution = new Resolution(300);
+
+                    // Create Jpeg device with specified attributes
+                    // Width, Height, Resolution
+                    //               int w = pdfDocument.GetWidth(); 
+
+                    //                int h = pdfDocument.Height;
+                    JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
+
+                    // Convert a particular page and save the image to stream
+                    JpegDevice.Process(pdfDocument+"#"N, directory + page.Number + "_out" + ".jpeg");
+                }
             }
 
 

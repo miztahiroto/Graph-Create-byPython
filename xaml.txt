@@ -89,10 +89,12 @@
                         <TextBox Margin="10,0,100,0" Height="20" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="436"  x:Name="PDFfile"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Height="Auto"  Margin="0,10,0,0" >
-                        <RadioButton Content="部分的に画像に変換" x:Name="partial" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="True"/>
-                        <TextBox Margin="10,0,100,0" Height="20" TextWrapping="Wrap" Text="例)1, 1-3等" VerticalAlignment="Top" Width="109"  />
+                        <StackPanel Orientation="Vertical" Height="Auto"  Margin="0,10,0,0" >
+                            <RadioButton Content="部分的に画像に変換" x:Name="partial" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="True" Margin="0,0,0,5"/>
+                            <RadioButton Content="全ページ画像に変換" x:Name="all" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        </StackPanel>
+                        <TextBox Margin="10,7,0,0" Height="20" TextWrapping="Wrap" Text="例)1, 1-3等" VerticalAlignment="Top" Width="109"  />
                     </StackPanel>
-                    <RadioButton Content="全ページ画像に変換" x:Name="all" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <Button Content="画像変換開始" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Click="Button_Click_14"/>
                     <Label Content="※複数ページ変換する場合はページ毎に画像が保存される" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </StackPanel>
