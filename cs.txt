@@ -7,11 +7,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using Aspose.Pdf;
-using Aspose.Pdf.Devices;
-using Microsoft.Win32;
-using System.Xml.Linq;
-using System.Text;
+using Spire.Pdf;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WpfApp2
 {
@@ -20,6 +21,10 @@ namespace WpfApp2
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
+
+        //画像処理フラグ
+        int img_flg = 0;
+
         //クリックされているか判定用
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern short GetKeyState(int nVirtkey);
 
@@ -28,7 +33,7 @@ namespace WpfApp2
         {
             InitializeComponent();
 
-            
+
         }
 
 
@@ -66,6 +71,8 @@ namespace WpfApp2
             {
                 reset();
             }
+
+            
 
             // オープンファイル・ダイアログボックスを設定
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -136,14 +143,14 @@ namespace WpfApp2
 
 
             //処理する画像
-            //           if (file.Text!=null)
-            //           {
+                       if (img_flg==0)
+                       {
             Bitmap bitmap = new Bitmap(file.Text);
-            //           }
-            //           else
-            //           {
-            //               Bitmap bitmap = new Bitmap(System.Windows.Clipboard.GetFileDropList());
-            //           }
+                       }
+                       else if(img_flg==1)
+                       {
+                           Bitmap bitmap = new Bitmap(System.Windows.Clipboard.GetFileDropList());
+                       }
 
 
 
@@ -361,7 +368,7 @@ namespace WpfApp2
 
             //保存場所の指定
             // SaveFileDialogを表示
-            
+
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
             dlg.AddExtension = true; //自動的に拡張子を付ける
@@ -372,20 +379,20 @@ namespace WpfApp2
             dlg.DereferenceLinks = false; // ショートカットが参照先を返す場合はtrue。リンクファイルを返す場合はfalse。規定値はfalse。
             dlg.FileName = "image"; // 選択されたファイルのフルパス。
             dlg.Filter = "png(*.png)|*.png|bmp(*.bmp)|*.bmp|jpeg(*.jpeg)|*.jpeg";
-            dlg.FilterIndex = 1 ; // 選択されたFilterのインデックス。規定値は1。
+            dlg.FilterIndex = 1; // 選択されたFilterのインデックス。規定値は1。
             dlg.InitialDirectory = directory; // ダイアログの初期ディレクトリ。規定値はEmpty。
             dlg.OverwritePrompt = true; // 存在するファイルを指定したときに、警告するか。規定値はtrue。
             dlg.Title = "保存するファイル名を入力してください。"; // ダイアログのタイトル。
             dlg.ValidateNames = true; // ファイル名がWin32に適合するか検査するかどうか。規定値はfalse。
 
             Nullable<bool> result = dlg.ShowDialog();
-            
+
             if (result == true)
             {
                 string imagefile = dlg.FileName;  //指定されたファイルのパス取得
-                
+
                 string fileExt = System.IO.Path.GetExtension(imagefile);
-//                System.Windows.MessageBox.Show(fileExt);
+                //                System.Windows.MessageBox.Show(fileExt);
                 //画像を作成する
                 ImageSource str_img = test.Source;
                 BitmapSource str_bmp = (BitmapSource)img;
@@ -400,7 +407,7 @@ namespace WpfApp2
                             encoder.Save(stream);
                         }
                         break;
-                        
+
                     case ".jpeg":
                         using (Stream stream = new FileStream(directory + "/image.jpeg", FileMode.Create))
                         {
@@ -419,10 +426,10 @@ namespace WpfApp2
                         break;
                 }
 
-                
 
-                
-                
+
+
+
 
 
 
@@ -436,39 +443,6 @@ namespace WpfApp2
                 // 終了します。
                 return;
             }
-
-
-
-
-            /*
-            DialogResult dr = saveFileDialog1.ShowDialog();
-            if (dr == System.Windows.Forms.DialogResult.OK)
-            {
-                textBox1.Text = saveFileDialog1.FileName;
-            }
-
-            // 保存ボタン以外が押下された場合
-            if (!result)
-            {
-                // 終了します。
-                return;
-            }
-
-            // @"C:/Users/" + username + "/Pictures";
-            */
-            /*
-                        string directory = Path.GetDirectoryName(file.Text);
-                        directory = directory + "/save.png";
-
-                        // BitmapSourceを保存する
-                        using (Stream stream = new FileStream(directory, FileMode.Create))
-                        {
-                            PngBitmapEncoder encoder = new PngBitmapEncoder();
-                            encoder.Frames.Add(BitmapFrame.Create(bmp));
-                            encoder.Save(stream);
-                            AutoClosingMessageBox.Show("保存しました", "保存", 2000);
-                        }
-            */
         }
 
         //文字認識 内部処理
@@ -476,13 +450,15 @@ namespace WpfApp2
         {
             //一時保存(文字認識後消去)
             TempSave();
-
+            
             //言語ファイルの格納先（tessdataフォルダのパス）
             string datapath = "C:/Program Files/Tesseract-OCR/tessdata";
 
+
+
             // 文字認識させるBitmapを作成する
-            string directory = Path.GetDirectoryName(file.Text);
-            //            MessageBox.Show(file.Text);
+            string username = Environment.UserName;
+            string directory = "C:\\Users\\" + username + "\\Pictures\\image\\";
             string directory_rev = directory + "/tmp_save.png";
 
             Tesseract.TesseractEngine tesseOCR = new Tesseract.TesseractEngine(datapath, lang);
@@ -492,7 +468,7 @@ namespace WpfApp2
 
             string result = page.GetText();
             TextBox.Text = result;
-
+            ori.Text = result;
             //文字認識完了後、一時保存していた画像を消去
             File.Delete(directory_rev);
         }
@@ -505,6 +481,8 @@ namespace WpfApp2
             {
                 string lang = "eng";
                 moji(lang);
+
+
             }
 
             //日本語含む
@@ -527,7 +505,7 @@ namespace WpfApp2
 
         private void test_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // スケールの値を変えることでホイールを動かした時の拡大率を制御できます
+            // マウスホイールによる拡大縮小
             double scale = 1.7;
             Bitmap bitmap = new Bitmap(file.Text);
 
@@ -597,21 +575,17 @@ namespace WpfApp2
         private void reset_button(object sender, RoutedEventArgs e)
         {
 
-            if (file.Text == null)
+            if (test.Source != null)
             {
-                test.Source = System.Windows.Clipboard.GetImage();
 
-            }
-            else if (file.Text != null)
-            {
-                System.Windows.MessageBox.Show(file.Text);
+                ImageSource rst_img = null;
+                rst_img = test.Source;
+                file.Text = null;
 
-                test.Source = new BitmapImage(new Uri(file.Text));
             }
             else
             {
-                test.Source = null;
-                file.Text = null; ;
+                return;
             }
         }
 
@@ -625,6 +599,7 @@ namespace WpfApp2
         {
             if (System.Windows.Clipboard.ContainsImage())
             {
+                img_flg = 1;
                 test.Source = System.Windows.Clipboard.GetImage();
                 TempSave();
             }
@@ -665,13 +640,65 @@ namespace WpfApp2
             static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
         }
 
-
-        private void Button_Click_13(object sender, RoutedEventArgs e)
+        //DeepLでの翻訳
+        private async void Button_Click_13(object sender, RoutedEventArgs e)
         {
+            // メッセージボックスを表示
+            DialogResult result = System.Windows.Forms.MessageBox.Show("社外サイトで翻訳します。\r\n機密情報はありませんか？", "確認", MessageBoxButtons.YesNo);
 
+            if (result == System.Windows.Forms.DialogResult.Yes)
+            {
+                
+                using (var httpClient = new HttpClient())
+                {
+                    using (var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate"))
+                    {
+                        var contentList = new List<string>();
+                        contentList.Add("auth_key=ceb16ca6-0983-dc86-ef57-0bde5bfb096f:fx");
+                        contentList.Add("text="+ori.Text);
+                        contentList.Add("target_lang=JA");
+
+                        request.Content = new StringContent(string.Join("&", contentList));
+                        request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+
+                        var response = await httpClient.SendAsync(request);
+                        var resBodyStr = response.Content.ReadAsStringAsync().Result;
+                        System.Windows.Forms.MessageBox.Show(resBodyStr);
+                        JObject deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
+                        
+                        tra.Text = deserial["translations"][0]["text"].ToString();
+                    }
+                }
+                /*
+                using (var httpClient = new HttpClient())
+                {
+                    using (var request = new HttpRequestMessage(new HttpMethod("POST"), "https://sentry.io/api/0/projects/1/groups/?status=unresolved"))
+                    {
+                        request.Headers.TryAddWithoutValidation("Accept", "application/json");
+                        request.Headers.TryAddWithoutValidation("User-Agent", "curl/7.60.0");
+
+                        var base64authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes("username:password"));
+                        request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
+
+                        request.Content = new StringContent("{\"status\": \"resolved\"}");
+                        request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                        var response = await httpClient.SendAsync(request);
+                    }
+                }
+                */
+                
+            }
+            else if (result == System.Windows.Forms.DialogResult.No)
+            {
+                return;
+            }
         }
 
-
+        private void txtSource_TextChanged(object sender, EventArgs e)
+        {
+            tra.Text = "";
+        }
 
         private void PDFUpload(object sender, RoutedEventArgs e)
         {
@@ -687,48 +714,87 @@ namespace WpfApp2
         private void Button_Click_14(object sender, RoutedEventArgs e)
         {
             string username = Environment.UserName;
-            string directory = "C:\\Users\\" + username + "\\Pictures\\image";
-            Document pdfDocument = new Document(PDFfile.Text);
-            int N, M = 0;
+            string directory = "C:\\Users\\" + username + "\\Pictures\\image\\";
+            PdfDocument doc = new PdfDocument();
+            doc.LoadFromFile(PDFfile.Text);
 
             if (all.IsChecked == true)
             {
-                foreach (var page in pdfDocument.Pages)
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+                dlg.AddExtension = false; //自動的に拡張子を付ける
+                dlg.DefaultExt = ".png"; //ダイアログに表示するファイルの拡張子
+                dlg.FileName = "PDFimage"; // 選択されたファイルのフルパス。
+                dlg.FilterIndex = 1; // 選択されたFilterのインデックス。規定値は1。
+                dlg.InitialDirectory = directory; // ダイアログの初期ディレクトリ。規定値はEmpty。
+                dlg.OverwritePrompt = true; // 存在するファイルを指定したときに、警告するか。規定値はtrue。
+                dlg.Title = "ファイル名を入力してください。"; // ダイアログのタイトル。
+                dlg.ValidateNames = true; // ファイル名がWin32に適合するか検査するかどうか。規定値はfalse。
+
+                Nullable<bool> result = dlg.ShowDialog();
+
+                if (result == true)
                 {
-                    // Define Resolution
-                    Resolution resolution = new Resolution(300);
+                    string file = Path.GetFileNameWithoutExtension(dlg.FileName);
 
-                    // Create Jpeg device with specified attributes
-                    // Width, Height, Resolution
-                    //               int w = pdfDocument.GetWidth(); 
-
-                    //                int h = pdfDocument.Height;
-                    JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
-
-                    // Convert a particular page and save the image to stream
-                    JpegDevice.Process(pdfDocument.Pages[page.Number], directory + page.Number + "_out" + ".jpeg");
+                    for (int i = 0; i < doc.Pages.Count; i++)
+                    {
+                        //PDFをbitmapに変換します。
+                        System.Drawing.Image bmp = doc.SaveAsImage(i);
+                        //bitmapをpngに保存します。
+                        string fileNo = string.Format("{0}_", i + 1);
+                        bmp.Save(directory + fileNo+file + ".png", System.Drawing.Imaging.ImageFormat.Png);
+//                        System.Windows.Forms.MessageBox.Show(directory+file + fileNo);
+                        
+                    }
+                    AutoClosingMessageBox.Show("画像出力完了", "完了", 2000);
                 }
             }
 
             if (partial.IsChecked == true)
             {
-                foreach (var page in pdfDocument.Pages)
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+                dlg.AddExtension = false; //自動的に拡張子を付ける
+                dlg.DefaultExt = ".png"; //ダイアログに表示するファイルの拡張子
+                dlg.FileName = "PDFimage"; // 選択されたファイルのフルパス。
+                dlg.FilterIndex = 1; // 選択されたFilterのインデックス。規定値は1。
+                dlg.InitialDirectory = directory; // ダイアログの初期ディレクトリ。規定値はEmpty。
+                dlg.OverwritePrompt = true; // 存在するファイルを指定したときに、警告するか。規定値はtrue。
+                dlg.Title = "ファイル名を入力してください。"; // ダイアログのタイトル。
+                dlg.ValidateNames = true; // ファイル名がWin32に適合するか検査するかどうか。規定値はfalse。
+
+                Nullable<bool> result = dlg.ShowDialog();
+
+                if (result == true)
                 {
-                    // Define Resolution
-                    Resolution resolution = new Resolution(300);
+                    string file = Path.GetFileNameWithoutExtension(dlg.FileName);
+                    int page1a= Int32.Parse(page1.Text);
+                    int page2a = Int32.Parse(page2.Text);
+                    int flag = 0;
 
-                    // Create Jpeg device with specified attributes
-                    // Width, Height, Resolution
-                    //               int w = pdfDocument.GetWidth(); 
+                    for (int i =page1a; i <= page2a; i++)
+                    {
+                        if (i<=0 || i>page2a)
+                        {
+                            flag = 1;
+                            AutoClosingMessageBox.Show("ページを指定しなおしてください", "エラー", 2000);
+                            break;
+                        }
+                        //PDFをbitmapに変換します。
+                        System.Drawing.Image bmp = doc.SaveAsImage(i-1);
+                        //bitmapをpngに保存します。
+                        string fileNo = string.Format("{0}_", i );
+                        bmp.Save(directory + fileNo + file + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        //                        System.Windows.Forms.MessageBox.Show(directory+file + fileNo);
 
-                    //                int h = pdfDocument.Height;
-                    JpegDevice JpegDevice = new JpegDevice(500, 700, resolution);
-
-                    // Convert a particular page and save the image to stream
-                    JpegDevice.Process(pdfDocument+"#"N, directory + page.Number + "_out" + ".jpeg");
+                    }
+                    if (flag==0)
+                    {
+                        AutoClosingMessageBox.Show("画像出力完了", "完了", 2000);
+                    }
                 }
             }
-
 
         }
 
