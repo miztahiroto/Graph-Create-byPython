@@ -406,12 +406,25 @@ namespace WpfApp2
         //文字認識 内部処理
         private void moji(string lang)
         {
-            //一時保存(文字認識後消去)
-            TempSave();
-            
+
             //言語ファイルの格納先（tessdataフォルダのパス）
             string datapath = "C:/Program Files/Tesseract-OCR/tessdata";
 
+            //言語pkgがDLされてないとき
+            if (! Directory.Exists(datapath)) {
+                System.Windows.Forms.MessageBox.Show("TesseractをDLしてください");
+                return;
+            }
+
+            //認識する画像が入っていないとき
+            if (test.Source==null)
+            {
+                System.Windows.Forms.MessageBox.Show("認識できる画像がありません");
+                return;
+            }
+
+            //一時保存(文字認識後消去)
+            TempSave();
 
             // 文字認識させるBitmapを作成する
             string username = Environment.UserName;
@@ -613,6 +626,13 @@ namespace WpfApp2
         //DeepLでの翻訳
         private async void Button_Click_13(object sender, RoutedEventArgs e)
         {
+            //textが空のとき
+            if (ori.Text==null)
+            {
+                System.Windows.Forms.MessageBox.Show("翻訳できるテキストがありません");
+                return;
+            }
+
             // メッセージボックスを表示
             DialogResult result = System.Windows.Forms.MessageBox.Show("社外サイトで翻訳します。\r\n機密情報はありませんか？", "確認", MessageBoxButtons.YesNo);
 
@@ -623,7 +643,7 @@ namespace WpfApp2
                 {
                     using (var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate"))
                     {
-                        string ori2 = ori.Text.Replace("\n", "\\n");
+                        string ori2 = ori.Text.Replace("\n", "<br>");
 
                         var contentList = new List<string>();
                         contentList.Add("auth_key=ceb16ca6-0983-dc86-ef57-0bde5bfb096f:fx");
@@ -641,7 +661,7 @@ namespace WpfApp2
 
 
                         JObject deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
-                        string tra2 = deserial["translations"][0]["text"].ToString().Replace("\\n", "\n");
+                        string tra2 = deserial["translations"][0]["text"].ToString().Replace("<br>", "\n");
                         tra.Text = tra2;
                     }
                 }
@@ -680,7 +700,7 @@ namespace WpfApp2
         {
             // オープンファイル・ダイアログボックスを設定
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Filter = "PDF|*.pdf";  // 左記拡張子のみフォロー
+            dlg.Filter = "PDF|*.pdf";
 
             System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
             ofd.ShowDialog();
@@ -689,11 +709,17 @@ namespace WpfApp2
 
         private void Button_Click_14(object sender, RoutedEventArgs e)
         {
+            if (PDFfile.Text==null)
+            {
+                System.Windows.Forms.MessageBox.Show("変換できるファイルがありません");
+                return;
+            }
             string username = Environment.UserName;
             string directory = "C:\\Users\\" + username + "\\Pictures\\image\\";
             PdfDocument doc = new PdfDocument();
             doc.LoadFromFile(PDFfile.Text);
-
+            
+            //全変換
             if (all.IsChecked == true)
             {
                 Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
@@ -727,6 +753,7 @@ namespace WpfApp2
                 }
             }
 
+            //部分変換
             if (partial.IsChecked == true)
             {
                 Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
