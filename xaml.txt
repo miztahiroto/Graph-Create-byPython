@@ -49,8 +49,7 @@
 
             <TabItem Header="文字認識">
                 <StackPanel Orientation="Vertical" Margin="10">
-                    <Label Content="画像処理タブ 処理後画像を使用し文字認識を実施します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    <Label Content="処理後の画像がない場合はUploadされた画像を使用します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Label Content="処理後画像を使用し文字認識を実施します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <StackPanel Orientation="Horizontal" Height="Auto"  Margin="0,10,0,0" >
                         <RadioButton Content="英語のみ" x:Name="radio1" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="True"/>
                         <RadioButton Content="日本語含む" x:Name="radio2" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="10,0,0,0" />
@@ -83,7 +82,7 @@
 
             <TabItem Header="PDF→画像">
                 <StackPanel Orientation="Vertical" Margin="10">
-                    <Label Content="画像処理実施のためにPDFを画像に変換します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Label Content="PDFを画像に変換します。" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <StackPanel Orientation="Horizontal" Height="Auto" Margin="-1,-1,-1,-1">
                         <Button Content="Upload" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="PDFUpload"/>
                         <TextBox Margin="10,0,100,0" Height="20" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="436"  x:Name="PDFfile"/>
@@ -98,7 +97,7 @@
                         <TextBox Margin="2,28,0,0" Height="20" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="24" x:Name="page2"/>
                     </StackPanel>
                     <Button Content="画像変換開始" Margin="0,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Click="Button_Click_14"/>
-                    <Label Content="※複数ページ変換する場合はページ毎に画像が保存される" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Label Content="※複数ページ変換する場合はページ毎に画像が保存されます" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </StackPanel>
 
             </TabItem>
