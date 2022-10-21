@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace WpfApp2
 {
@@ -623,6 +624,15 @@ namespace WpfApp2
             static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
         }
 
+        /*
+        //jsonフォーマット指定
+        private static string Json(object sender, MouseWheelEventArgs e)
+        {
+            dynamic parsedJson = JsonConvert.DeserializeObject(json);
+            return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+        }
+    */
+        
         //DeepLでの翻訳
         private async void Button_Click_13(object sender, RoutedEventArgs e)
         {
@@ -643,7 +653,7 @@ namespace WpfApp2
                 {
                     using (var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate"))
                     {
-                        string ori2 = ori.Text.Replace("\n", "<br>");
+                        string ori2 = ori.Text.Replace("\n", "\n");
 
                         var contentList = new List<string>();
                         contentList.Add("auth_key=ceb16ca6-0983-dc86-ef57-0bde5bfb096f:fx");
@@ -660,10 +670,18 @@ namespace WpfApp2
                         System.Windows.Forms.MessageBox.Show(resBodyStr);
 
 
+
+ //                       string tra2 = JsonSerializer.Serialize<translations>(text);
                         JObject deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
-                        string tra2 = deserial["translations"][0]["text"].ToString().Replace("<br>", "\n");
-                        tra.Text = tra2;
+//                        string tra2 = deserial["translations"][0]["text"].ToString().Replace(".", "." + Environment.NewLine);
+                                               string tra2 = deserial["translations"][0]["text"].ToString();
+                        dynamic parsedJson = JsonConvert.DeserializeObject(tra2);
+                        tra.Text = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+//                        tra.Text = tra2;
+
+                        
                     }
+                    
                 }
                 /*
                 using (var httpClient = new HttpClient())
