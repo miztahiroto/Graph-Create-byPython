@@ -1,0 +1,567 @@
+using System;
+using System.Drawing;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+using Spire.Pdf;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
+using System.Xml.Linq;
+
+namespace WpfApp2
+{
+    /// <summary>
+    /// MainWindow.xaml の相互作用ロジック
+    /// </summary>
+    public partial class MainWindow : System.Windows.Window
+    {
+
+
+        //クリックされているか判定用
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern short GetKeyState(int nVirtkey);
+
+
+
+        //画面上の指定座標の1ピクセルの色を返す
+        private System.Windows.Media.Color GetPixelColor(int x, int y)
+        {
+            //1x1サイズのBitmap作成
+            using (System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(
+                1, 1, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            {
+                using (var bmpGraphics = System.Drawing.Graphics.FromImage(bitmap))
+                {
+                    //画面をキャプチャして指定座標の1ピクセルだけBitmapにコピー
+                    bmpGraphics.CopyFromScreen(x, y, 0, 0, new System.Drawing.Size(1, 1));
+                    //ピクセルの色取得
+                    System.Drawing.Color color = bitmap.GetPixel(0, 0);
+                    //WPF用にSystem.Windows.Media.Colorに変換して返す
+                    return System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
+                }
+            }
+        }
+
+
+        //色の抽出(クリック点を白に置換)
+        private System.Drawing.Image ExtractColors(Bitmap bitmap)
+        {
+            if (MyTextBlockGetColor_R.Text == null || MyTextBlockGetColor_G.Text == null || MyTextBlockGetColor_B.Text == null)
+            {
+                return bitmap;
+            }
+
+            // 縦横サイズを配列から読み取り
+            int w = bitmap.Width;
+            int h = bitmap.Height;
+            // 出力画像用の配列
+            byte[,] data1 = new byte[w, h];
+            byte[,] data2 = new byte[w, h];
+            byte[,] data3 = new byte[w, h];
+
+            int conv_R = Convert.ToInt32(MyTextBlockGetColor_R.Text);
+            int conv_G = Convert.ToInt32(MyTextBlockGetColor_G.Text);
+            int conv_B = Convert.ToInt32(MyTextBlockGetColor_B.Text);
+
+            // 色変換
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+                    data1[j, i] = (byte)((bitmap.GetPixel(j, i).R));
+                    data2[j, i] = (byte)((bitmap.GetPixel(j, i).G));
+                    data3[j, i] = (byte)((bitmap.GetPixel(j, i).B));
+
+                    //クリック点の周辺色を白色に変換
+                    for (int k = conv_R - 20; k <= conv_R + 20; k++)
+                    {
+                        int l = conv_G - 20;
+                        int m = conv_B - 20;
+
+                        if (k == data1[j, i] || l == data2[j, i] || m == data3[j, i])
+                        {
+                            data1[j, i] = 255;
+                            data2[j, i] = 255;
+                            data3[j, i] = 255;
+                        }
+                        l++;
+                        m++;
+                    }
+                    bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data1[j, i], data2[j, i], data3[j, i]));
+                }
+            }
+            return bitmap;
+        }
+
+
+        //グレースケール & 2値化
+        private System.Drawing.Image GrayScale(Bitmap bitmap)
+        {
+            int w = bitmap.Width;
+            int h = bitmap.Height;
+            byte[,] data = new byte[w, h];
+
+            // bitmapクラスの画像pixel値を配列に挿入
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+                    // グレイスケール変換処理
+                    data[j, i] = (byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G) / 3);
+
+                    /*
+                    //2値化(うまく効果を得られないため一時退避中)
+                    //グレイスケールで計算した値を輝度とみなし、閾値を設け2値化
+                    int th = 200;//閾値
+                    if (data[j, i] < th)
+                    {
+                        data[j, i] = 30;
+                    }
+                    else
+                    {
+                        data[j, i] =255;
+                    }
+                    */
+                    bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data[j, i], data[j, i], data[j, i]));
+                }
+            }
+            return bitmap;
+        }
+
+
+        //拡大
+        private System.Drawing.Image Expand(Bitmap bitmap)
+        {
+            int w = bitmap.Width * 2;
+            int h = bitmap.Height * 2;
+
+            Bitmap newbitmap = new Bitmap(w, h);
+            Graphics g = Graphics.FromImage(newbitmap);
+
+            foreach (InterpolationMode im in Enum.GetValues(typeof(InterpolationMode)))
+            {
+                if (im == InterpolationMode.Invalid)
+                    continue;
+                g.InterpolationMode = im;
+                g.DrawImage(bitmap, 0, 0, w, h);
+            }
+            bitmap = newbitmap;
+
+            return bitmap;
+        }
+
+
+
+
+
+    
+
+
+        //画像の拡大縮小(マウス操作)
+        private void test_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // マウスホイールによる拡大縮小
+            double scale = 1.7;
+            Bitmap bitmap = new Bitmap(file.Text);
+
+            var matrix = test.RenderTransform.Value;
+            if (e.Delta > 0)
+            {
+                // 拡大処理
+                matrix.ScaleAt(scale, scale, test.Width / 2, test.Height / 2);
+            }
+            else
+            {
+                // 縮小処理
+                matrix.ScaleAt(1.0 / scale, 1.0 / scale, e.GetPosition(this).X, e.GetPosition(this).Y);
+            }
+
+            test.RenderTransform = new MatrixTransform(matrix);
+        }
+
+        
+        //左クリックを押したまま処理後の画像を平行移動できる
+        //クリック点の座標取得
+        private System.Windows.Point _start;
+        private void test_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            test.CaptureMouse();
+            _start = e.GetPosition(Border1);
+        }
+        //マウスを動かしたとき(平行移動)
+        private void test_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (test.IsMouseCaptured)
+            {
+                var matrix = test.RenderTransform.Value;
+
+                Vector v = _start - e.GetPosition(Border1);
+                matrix.Translate(-v.X, -v.Y);
+                test.RenderTransform = new MatrixTransform(matrix);
+                _start = e.GetPosition(Border1);
+            }
+        }
+        
+
+
+
+  
+
+
+
+
+
+        //グレースケール
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+        //画像未選択の場合
+        if (test.Source == null)
+        {
+            System.Windows.MessageBox.Show("画像選択からやり直してください");
+            return;
+        }
+
+        Bitmap bitmap = new Bitmap(file.Text);
+        int w = bitmap.Width;
+        int h = bitmap.Height;
+        byte[,] data = new byte[w, h];
+
+        // bitmapクラスの画像pixel値を配列に挿入
+        for (int i = 0; i < h; i++)
+        {
+            for (int j = 0; j < w; j++)
+            {
+                // グレイスケール変換処理
+                data[j, i] = (byte)((bitmap.GetPixel(j, i).R + bitmap.GetPixel(j, i).B + bitmap.GetPixel(j, i).G) / 3);
+                bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data[j, i], data[j, i], data[j, i]));
+            }
+        }
+
+        // 表示
+        IntPtr hbitmap = bitmap.GetHbitmap();
+        test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+    }
+*/
+
+
+        
+        //ガンマ補正
+        private System.Drawing.Bitmap CreateGammaAdjustedImage(Bitmap img, float gammaValue)
+        {
+            //補正された画像の描画先となるImageオブジェクトを作成
+            Bitmap newImg = new Bitmap(img.Width, img.Height);
+            //newImgのGraphicsオブジェクトを取得
+            Graphics g = Graphics.FromImage(newImg);
+
+            //ImageAttributesオブジェクトの作成
+            System.Drawing.Imaging.ImageAttributes ia =
+                new System.Drawing.Imaging.ImageAttributes();
+            //ガンマ値を設定する
+            //ia.SetGamma(1);
+            ia.SetGamma(1 / gammaValue);
+
+            //ImageAttributesを使用して描画
+            g.DrawImage(img,
+                new System.Drawing.Rectangle(0, 0, img.Width, img.Height),
+                0, 0, img.Width, img.Height, GraphicsUnit.Pixel, ia);
+
+            //リソースを解放する
+            g.Dispose();
+
+            return newImg;
+        }
+
+        //ガンマ補正　ボタン処理
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
+            //ガンマ補正をする画像
+            Bitmap img = new Bitmap(file.Text);
+            //ガンマ値を2.0にした画像を作成する
+            System.Drawing.Bitmap newImg = CreateGammaAdjustedImage(img, 2f);
+            img.Dispose();
+            //bitmapの形式変換し表示
+            IntPtr hbitmap = newImg.GetHbitmap();
+            test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+        }
+        
+
+        
+        //色反転
+        private System.Drawing.Image CreateNegativeImage(System.Drawing.Image bitmap)
+        {
+            //ネガティブイメージの描画先となるImageオブジェクトを作成
+            Bitmap negaImg = new Bitmap(bitmap.Width, bitmap.Height);
+            //negaImgのGraphicsオブジェクトを取得
+            Graphics g = Graphics.FromImage(negaImg);
+
+            //ColorMatrixオブジェクトの作成
+            System.Drawing.Imaging.ColorMatrix cm =
+                new System.Drawing.Imaging.ColorMatrix();
+            //ColorMatrixの行列の値を変更して、色が反転されるようにする
+            cm.Matrix00 = -1;
+            cm.Matrix11 = -1;
+            cm.Matrix22 = -1;
+            cm.Matrix33 = 1;
+            cm.Matrix40 = cm.Matrix41 = cm.Matrix42 = cm.Matrix44 = 1;
+
+            //ImageAttributesオブジェクトの作成
+            System.Drawing.Imaging.ImageAttributes ia =
+                new System.Drawing.Imaging.ImageAttributes();
+            //ColorMatrixを設定する
+            ia.SetColorMatrix(cm);
+
+            //ImageAttributesを使用して色が反転した画像を描画
+            g.DrawImage(bitmap,
+                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                0, 0, bitmap.Width, bitmap.Height, GraphicsUnit.Pixel, ia);
+
+            //リソースを解放する
+            g.Dispose();
+
+            return negaImg;
+        }
+
+        //反転　ボタン処理
+        private void Button_Click_5(object sender, RoutedEventArgs e)
+        {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
+            Bitmap bitmap = new Bitmap(file.Text);
+            // 縦横サイズを配列から読み取り
+            int w = bitmap.Width;
+            int h = bitmap.Height;
+            // 出力画像用の配列
+            byte[,] data1 = new byte[w, h];
+            byte[,] data2 = new byte[w, h];
+            byte[,] data3 = new byte[w, h];
+            // ネガポジ反転処理
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+                    data1[j, i] = (byte)((bitmap.GetPixel(j, i).R));
+                    data2[j, i] = (byte)((bitmap.GetPixel(j, i).B));
+                    data3[j, i] = (byte)((bitmap.GetPixel(j, i).G));
+                    bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(255 - data1[j, i], 255 - data2[j, i], 255 - data3[j, i]));
+                }
+            }
+
+            // bitmapの形式変換し表示
+            IntPtr hbitmap = bitmap.GetHbitmap();
+            test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+        }
+        
+
+        
+        //コントラスト
+        private System.Drawing.Image AdjustContrast(Bitmap bitmap, float contrast)
+        {
+            //コントラストを変更した画像の描画先となるImageオブジェクトを作成
+            Bitmap newImg = new Bitmap(bitmap.Width, bitmap.Height);
+            //newImgのGraphicsオブジェクトを取得
+            Graphics g = Graphics.FromImage(newImg);
+
+            //ColorMatrixオブジェクトの作成
+            float scale = (100f + contrast) / 100f;
+            scale *= scale;
+            float append = 0.5f * (1f - scale);
+            System.Drawing.Imaging.ColorMatrix cm =
+                new System.Drawing.Imaging.ColorMatrix(
+                    new float[][] {
+                new float[] {scale, 0, 0, 0, 0},
+                new float[] {0, scale, 0, 0, 0},
+                new float[] {0, 0, scale, 0, 0},
+                new float[] {0, 0, 0, 1, 0},
+                new float[] {append, append, append, 0, 1}
+            });
+
+            //ImageAttributesオブジェクトの作成
+            System.Drawing.Imaging.ImageAttributes ia =
+                new System.Drawing.Imaging.ImageAttributes();
+            //ColorMatrixを設定する
+            ia.SetColorMatrix(cm);
+
+            //ImageAttributesを使用して描画
+            g.DrawImage(bitmap,
+                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                0, 0, bitmap.Width, bitmap.Height, GraphicsUnit.Pixel, ia);
+
+            //リソースを解放する
+            g.Dispose();
+
+            return newImg;
+        }
+        //コントラスト　ボタン処理
+        private void Button_Click_6(object sender, RoutedEventArgs e)
+        {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
+            Bitmap bitmap = new Bitmap(file.Text);
+            //コントラストを50にした画像を作成する
+            System.Drawing.Bitmap newImg = (System.Drawing.Bitmap)AdjustContrast(bitmap, 50);
+            // bitmapの形式変換し表示
+            IntPtr hbitmap = newImg.GetHbitmap();
+            test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+        }
+        
+
+        
+        //彩度
+        private System.Drawing.Image ChangeSaturation(Bitmap bitmap, int saturation)
+        {
+            //彩度を変更した画像の描画先となるImageオブジェクトを作成
+            Bitmap newImg = new Bitmap(bitmap.Width, bitmap.Height);
+            //newImgのGraphicsオブジェクトを取得
+            Graphics g = Graphics.FromImage(newImg);
+
+            //ColorMatrixオブジェクトの作成
+            System.Drawing.Imaging.ColorMatrix cm =
+                new System.Drawing.Imaging.ColorMatrix();
+            const float rwgt = 0.3086f;
+            const float gwgt = 0.6094f;
+            const float bwgt = 0.0820f;
+            cm.Matrix01 = cm.Matrix02 = (1f - saturation) * rwgt;
+            cm.Matrix00 = cm.Matrix01 + saturation;
+            cm.Matrix10 = cm.Matrix12 = (1f - saturation) * gwgt;
+            cm.Matrix11 = cm.Matrix10 + saturation;
+            cm.Matrix20 = cm.Matrix21 = (1f - saturation) * bwgt;
+            cm.Matrix22 = cm.Matrix20 + saturation;
+            cm.Matrix33 = cm.Matrix44 = 1;
+
+            //ImageAttributesオブジェクトの作成
+            System.Drawing.Imaging.ImageAttributes ia =
+                new System.Drawing.Imaging.ImageAttributes();
+            //ColorMatrixを設定する
+            ia.SetColorMatrix(cm);
+
+            //ImageAttributesを使用して描画
+            g.DrawImage(bitmap,
+                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                0, 0, bitmap.Width, bitmap.Height, GraphicsUnit.Pixel, ia);
+
+            //リソースを解放する
+            g.Dispose();
+
+            return newImg;
+        }
+
+        //彩度　ボタン処理
+        private void Button_Click_7(object sender, RoutedEventArgs e)
+        {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
+            //彩度を変更する画像
+            Bitmap bitmap = new Bitmap(file.Text);
+            //彩度を変更した画像を作成する
+            System.Drawing.Bitmap newImg = (System.Drawing.Bitmap)ChangeSaturation(bitmap, 3);
+            bitmap.Dispose();
+
+            // 表示
+            IntPtr hbitmap = newImg.GetHbitmap();
+            test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+        }
+        
+
+        
+        //色抽出　ボタン処理
+        private void Button_Click_8(object sender, RoutedEventArgs e)
+        {
+            //画像未選択の場合
+            if (test.Source == null)
+            {
+                System.Windows.MessageBox.Show("画像選択からやり直してください");
+                return;
+            }
+
+            //色抜きする画像
+            Bitmap bitmap = new Bitmap(file.Text);
+            // 縦横サイズを配列から読み取り
+            int w = bitmap.Width;
+            int h = bitmap.Height;
+            // 出力画像用の配列
+            byte[,] data1 = new byte[w, h];
+            byte[,] data2 = new byte[w, h];
+            byte[,] data3 = new byte[w, h];
+
+            //if (MyTextBlockGetColor_R.Text != null && MyTextBlockGetColor_G.Text != null && MyTextBlockGetColor_B.Text != null)
+            //{
+
+            //    return;
+            //}
+
+            int conv_R = Convert.ToInt32(MyTextBlockGetColor_R.Text);
+            int conv_G = Convert.ToInt32(MyTextBlockGetColor_G.Text);
+            int conv_B = Convert.ToInt32(MyTextBlockGetColor_B.Text);
+
+            // 色変換
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+
+                    data1[j, i] = (byte)((bitmap.GetPixel(j, i).R));
+                    data2[j, i] = (byte)((bitmap.GetPixel(j, i).G));
+                    data3[j, i] = (byte)((bitmap.GetPixel(j, i).B));
+
+                    //クリック点の周辺色を白色に変換
+                    for (int k = conv_R - 20; k <= conv_R + 20; k++)
+                    {
+                        int l = conv_G - 20;
+                        int m = conv_B - 20;
+
+                        if (k == data1[j, i] || l == data2[j, i] || m == data3[j, i])
+                        {
+                            data1[j, i] = 255;
+                            data2[j, i] = 255;
+                            data3[j, i] = 255;
+                        }
+                        l++;
+                        m++;
+                    }
+                    bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(data1[j, i], data2[j, i], data3[j, i]));
+                }
+            }
+
+            // 表示
+            IntPtr hbitmap = bitmap.GetHbitmap();
+            test2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hbitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+        }
+        
+
+
+
+
+    }
+}
