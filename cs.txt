@@ -13,7 +13,8 @@ using System.Net.Http.Headers;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Linq;
+using System.Windows.Controls;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WpfApp2
 {
@@ -34,7 +35,7 @@ namespace WpfApp2
 
 
         }
-        
+
 
         //クリック判定
         private bool IsClickDown()
@@ -62,7 +63,7 @@ namespace WpfApp2
             }
         }
 
-        
+
         //画像選択
         private void Upload(object sender, RoutedEventArgs e)
         {
@@ -85,7 +86,7 @@ namespace WpfApp2
             MemoryStream ms = new MemoryStream();
             using (FileStream fs = new FileStream(dlg.FileName, FileMode.Open))
             {
-                fs.CopyTo(ms);      
+                fs.CopyTo(ms);
             }
             file.Text = dlg.FileName;
 
@@ -107,7 +108,7 @@ namespace WpfApp2
         {
             System.Drawing.Point p = System.Windows.Forms.Cursor.Position;//マウスカーソル位置取得
             System.Windows.Media.Color c = GetPixelColor(p.X, p.Y);//マウスカーソル位置の色取得
-            var b = new SolidColorBrush(c);
+            var b = new System.Windows.Media.SolidColorBrush(c);
             MyTextBlockColor.Background = b;
             //MyTextBlockColor.Text = c.ToString();
             //MyTextBlockCursorLocation.Text = $"マウスの位置 = {System.Windows.Forms.Cursor.Position}";
@@ -178,7 +179,7 @@ namespace WpfApp2
             byte[,] data1 = new byte[w, h];
             byte[,] data2 = new byte[w, h];
             byte[,] data3 = new byte[w, h];
-            
+
             int conv_R = Convert.ToInt32(MyTextBlockGetColor_R.Text);
             int conv_G = Convert.ToInt32(MyTextBlockGetColor_G.Text);
             int conv_B = Convert.ToInt32(MyTextBlockGetColor_B.Text);
@@ -247,7 +248,7 @@ namespace WpfApp2
             }
             return bitmap;
         }
-        
+
 
         //拡大
         private System.Drawing.Image Expand(Bitmap bitmap)
@@ -412,13 +413,14 @@ namespace WpfApp2
             string datapath = "C:/Program Files/Tesseract-OCR/tessdata";
 
             //言語pkgがDLされてないとき
-            if (! Directory.Exists(datapath)) {
+            if (!Directory.Exists(datapath))
+            {
                 System.Windows.Forms.MessageBox.Show("TesseractをDLしてください");
                 return;
             }
 
             //認識する画像が入っていないとき
-            if (test.Source==null)
+            if (test.Source == null)
             {
                 System.Windows.Forms.MessageBox.Show("認識できる画像がありません");
                 return;
@@ -494,7 +496,7 @@ namespace WpfApp2
                 matrix.ScaleAt(1.0 / scale, 1.0 / scale, e.GetPosition(this).X, e.GetPosition(this).Y);
             }
 
-            test.RenderTransform = new MatrixTransform(matrix);
+            test.RenderTransform = new System.Windows.Media.MatrixTransform(matrix);
         }
 
         /*
@@ -544,11 +546,11 @@ namespace WpfApp2
         private void reset_button(object sender, RoutedEventArgs e)
         {
 
-            if (test.Source != null　|| file.Text!=null)
+            if (test.Source != null || file.Text != null)
             {
-//                < file:C: \Users\rd56285\Pictures\image\save.png >
+                //                < file:C: \Users\rd56285\Pictures\image\save.png >
 
-                  ImageSource rst_img = null;
+                ImageSource rst_img = null;
                 rst_img = test.Source;
                 file.Text = null;
 
@@ -583,8 +585,8 @@ namespace WpfApp2
                     bitmap = new System.Drawing.Bitmap(outStream);
                     bitmap.Save(@"C:/Users/" + username + "/Pictures/image/save.png", System.Drawing.Imaging.ImageFormat.Png);
                 }
-//                test.Source = bitmap;
-//                bitmap.Save(@"C:/Users/" + username + "/Pictures/image/save.png", System.Drawing.Imaging.ImageFormat.Png);
+                //                test.Source = bitmap;
+                //                bitmap.Save(@"C:/Users/" + username + "/Pictures/image/save.png", System.Drawing.Imaging.ImageFormat.Png);
                 file.Text = @"C:/Users/" + username + "/Pictures/image/save.png";
             }
             else
@@ -632,12 +634,12 @@ namespace WpfApp2
             return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
         }
     */
-        
+
         //DeepLでの翻訳
         private async void Button_Click_13(object sender, RoutedEventArgs e)
         {
             //textが空のとき
-            if (ori.Text==null)
+            if (ori.Text == null)
             {
                 System.Windows.Forms.MessageBox.Show("翻訳できるテキストがありません");
                 return;
@@ -653,11 +655,23 @@ namespace WpfApp2
                 {
                     using (var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api-free.deepl.com/v2/translate"))
                     {
-                        string ori2 = ori.Text.Replace("\n", "\n");
+//                        string ori2 = ori.Text.Replace("\n", "\n");
 
                         var contentList = new List<string>();
                         contentList.Add("auth_key=ceb16ca6-0983-dc86-ef57-0bde5bfb096f:fx");
-                        contentList.Add("text=" + ori2);
+
+                        StringReader ori2 = new StringReader(ori.Text);
+                        string ori3 = ori2.ReadLine();
+
+                        int length = 0;
+                        while (ori3 != null)
+                        {
+                            
+                            contentList.Add("text=" + ori3);
+                            ori3 = ori2.ReadLine();
+                            length++;
+                        }
+                        
                         contentList.Add("target_lang=JA");
 
                         request.Content = new StringContent(string.Join("&", contentList));
@@ -667,21 +681,36 @@ namespace WpfApp2
                         var resBodyStr = response.Content.ReadAsStringAsync().Result;
                         var resStatusCoode = response.StatusCode;
 
-                        System.Windows.Forms.MessageBox.Show(resBodyStr);
+//                        System.Windows.Forms.MessageBox.Show(resBodyStr);
 
 
 
- //                       string tra2 = JsonSerializer.Serialize<translations>(text);
+                        //                       string tra2 = JsonSerializer.Serialize<translations>(text);
                         JObject deserial = (JObject)JsonConvert.DeserializeObject(resBodyStr);
-//                        string tra2 = deserial["translations"][0]["text"].ToString().Replace(".", "." + Environment.NewLine);
-                                               string tra2 = deserial["translations"][0]["text"].ToString();
+                        //                        string tra2 = deserial["translations"][0]["text"].ToString().Replace(".", "." + Environment.NewLine);
+
+
+
+                        for (int i = 0; i < length; i++)
+                        {
+
+                            tra.Text += deserial["translations"][i]["text"].ToString() + "\r\n";
+                        }   
+                            
+
+                         
+
+                        /*
+                        string tra2 = deserial["translations"][0]["text"].ToString();
+                        string tra3 = deserial["translations"][1]["text"].ToString();
                         dynamic parsedJson = JsonConvert.DeserializeObject(tra2);
                         tra.Text = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-//                        tra.Text = tra2;
+                        */
+                        //                        tra.Text = tra2;
 
-                        
+
                     }
-                    
+
                 }
                 /*
                 using (var httpClient = new HttpClient())
@@ -727,7 +756,7 @@ namespace WpfApp2
 
         private void Button_Click_14(object sender, RoutedEventArgs e)
         {
-            if (PDFfile.Text==null)
+            if (PDFfile.Text == null)
             {
                 System.Windows.Forms.MessageBox.Show("変換できるファイルがありません");
                 return;
@@ -736,7 +765,7 @@ namespace WpfApp2
             string directory = "C:\\Users\\" + username + "\\Pictures\\image\\";
             PdfDocument doc = new PdfDocument();
             doc.LoadFromFile(PDFfile.Text);
-            
+
             //全変換
             if (all.IsChecked == true)
             {
@@ -755,7 +784,7 @@ namespace WpfApp2
 
                 if (result == true)
                 {
-                    string file = Path.GetFileNameWithoutExtension(dlg.FileName);
+                    string file = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
 
                     for (int i = 0; i < doc.Pages.Count; i++)
                     {
@@ -763,9 +792,9 @@ namespace WpfApp2
                         System.Drawing.Image bmp = doc.SaveAsImage(i);
                         //bitmapをpngに保存します。
                         string fileNo = string.Format("{0}_", i + 1);
-                        bmp.Save(directory + fileNo+file + ".png", System.Drawing.Imaging.ImageFormat.Png);
-//                        System.Windows.Forms.MessageBox.Show(directory+file + fileNo);
-                        
+                        bmp.Save(directory + fileNo + file + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        //                        System.Windows.Forms.MessageBox.Show(directory+file + fileNo);
+
                     }
                     AutoClosingMessageBox.Show("画像出力完了", "完了", 2000);
                 }
@@ -789,28 +818,28 @@ namespace WpfApp2
 
                 if (result == true)
                 {
-                    string file = Path.GetFileNameWithoutExtension(dlg.FileName);
-                    int page1a= Int32.Parse(page1.Text);
+                    string file = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
+                    int page1a = Int32.Parse(page1.Text);
                     int page2a = Int32.Parse(page2.Text);
                     int flag = 0;
 
-                    for (int i =page1a; i <= page2a; i++)
+                    for (int i = page1a; i <= page2a; i++)
                     {
-                        if (i<=0 || i>page2a)
+                        if (i <= 0 || i > page2a)
                         {
                             flag = 1;
                             AutoClosingMessageBox.Show("ページを指定しなおしてください", "エラー", 2000);
                             break;
                         }
                         //PDFをbitmapに変換します。
-                        System.Drawing.Image bmp = doc.SaveAsImage(i-1);
+                        System.Drawing.Image bmp = doc.SaveAsImage(i - 1);
                         //bitmapをpngに保存します。
-                        string fileNo = string.Format("{0}_", i );
+                        string fileNo = string.Format("{0}_", i);
                         bmp.Save(directory + fileNo + file + ".png", System.Drawing.Imaging.ImageFormat.Png);
                         //                        System.Windows.Forms.MessageBox.Show(directory+file + fileNo);
 
                     }
-                    if (flag==0)
+                    if (flag == 0)
                     {
                         AutoClosingMessageBox.Show("画像出力完了", "完了", 2000);
                     }
