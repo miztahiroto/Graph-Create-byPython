@@ -1,0 +1,51 @@
+using System;
+using System.Windows;
+using System.IO;
+
+
+namespace Image_processing_Ver2
+{
+    /// <summary>
+    /// SubWindow.xaml の相互作用ロジック
+    /// </summary>
+    public partial class SubWindow : System.Windows.Window
+    {
+        public SubWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void API_send(object sender, RoutedEventArgs e)
+        {
+            //情シID取得
+            string username = Environment.UserName;
+
+            // APIファイルパス
+            string API_file = @"C:\Users\rd56285\Desktop\課題業績用ツール\1.文字認識Ver2(PDF→画像変換追加)\Image_processing_Ver2\Image_processing_Ver2\API.txt";
+
+
+            // APIキーがあるか確認
+            using (StreamReader reader = new StreamReader(API_file))
+            {
+                // 読み取り可能文字が存在しない（ファイルの末尾に到着）すると -1 が返される
+                while (reader.Peek() > -1)
+                {
+                    // 1 行ずつ読み込む
+                    reader.ReadLine();
+                }
+                // ファイルを閉じる
+                reader.Close();
+            }
+
+            // 出力用ファイルオープン
+            using (StreamWriter writer = new StreamWriter(API_file))
+            {
+                string API_key = API.Text;
+
+                writer.Write(username + "," + API_key);
+                // ファイルを閉じる
+                writer.Close();
+            }
+        }
+    }
+}
