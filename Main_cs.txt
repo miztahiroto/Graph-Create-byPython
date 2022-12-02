@@ -679,9 +679,42 @@ namespace Image_processing_Ver2
             }
 
             //固有のAPIキーがあるか確認
-            var win = new SubWindow();
-            win.Owner = GetWindow(this);
-            win.ShowDialog();
+            // APIキーがあるか確認
+            string username = Environment.UserName;
+            string API_read = @"C:\Users\rd56285\Desktop\課題業績用ツール\4.文字認識Ver2\画像処理ver2\画像処理ver2\API_read.txt";
+            string API_write = @"C:\Users\rd56285\Desktop\課題業績用ツール\4.文字認識Ver2\画像処理ver2\画像処理ver2\API_write.txt";
+
+            // APIキーがあるか確認
+            using (StreamReader reader = new StreamReader(API_read))
+            {
+                // 1 行ずつ読み込む
+                while (0 <= reader.Peek())
+                {
+                    string row = reader.ReadLine();
+                    string[] columns = row.Split(',');
+
+                    //APIキーがあるときはスキップ
+                    if (columns[0] == username && columns[1]!=null)
+                    {
+                        break;
+                    }
+
+                    //APIキーないときは登録してもらう(別Window)
+                    else
+                    {
+                        var win = new SubWindow();
+                        win.Owner = GetWindow(this);
+                        win.ShowDialog();
+                        break;
+                    }
+
+                }
+                reader.Close();
+                File.Copy(API_write, API_read, true);
+            }
+
+
+            
 
             // メッセージボックスを表示
             DialogResult result = System.Windows.Forms.MessageBox.Show("社外サイトで翻訳します。\r\n機密情報はありませんか？", "確認", MessageBoxButtons.YesNo);

@@ -1,7 +1,7 @@
 using System;
 using System.Windows;
 using System.IO;
-
+using System.Text;
 
 namespace Image_processing_Ver2
 {
@@ -21,31 +21,86 @@ namespace Image_processing_Ver2
             string username = Environment.UserName;
 
             // APIファイルパス
-            string API_file = @"C:\Users\rd56285\Desktop\課題業績用ツール\1.文字認識Ver2(PDF→画像変換追加)\Image_processing_Ver2\Image_processing_Ver2\API.txt";
-
+            string API_read = @"C:\Users\rd56285\Desktop\課題業績用ツール\4.文字認識Ver2\画像処理ver2\画像処理ver2\API_read.txt";
+            string API_write = @"C:\Users\rd56285\Desktop\課題業績用ツール\4.文字認識Ver2\画像処理ver2\画像処理ver2\API_write.txt";
 
             // APIキーがあるか確認
-            using (StreamReader reader = new StreamReader(API_file))
+            using (StreamReader reader = new StreamReader(API_read))
             {
-                // 読み取り可能文字が存在しない（ファイルの末尾に到着）すると -1 が返される
-                while (reader.Peek() > -1)
+                StreamWriter writer = new StreamWriter(API_write, true);
+                // 1 行ずつ読み込む
+                while (0 <= reader.Peek())
                 {
-                    // 1 行ずつ読み込む
-                    reader.ReadLine();
+                    string row = reader.ReadLine();
+
+                    //カンマ区切り
+                    string[] columns = row.Split(',');
+
+                    //API書き込み
+                    // ファイルを開く
+                    
+                    if (columns[0] != username)
+                    {
+                        
+
+                        string API_key = API.Text;
+                        writer.WriteLine(username + "," + API_key);
+                       
+
+                        MessageBox.Show("APIキーを登録しました。\r\n情シID:" + username + "\r\nAPIキー：" + API_key);
+                        break;
+                    }
+                    else if(columns[0] == username)
+                    {
+                        writer.WriteLine();
+                        MessageBox.Show("過去に情報が登録されていたため更新しました。\r\n情シID ：" + username + "\r\nAPIキー：" + columns[1]);
+                        break;
+                    }
+                    
                 }
-                // ファイルを閉じる
-                reader.Close();
-            }
-
-            // 出力用ファイルオープン
-            using (StreamWriter writer = new StreamWriter(API_file))
-            {
-                string API_key = API.Text;
-
-                writer.Write(username + "," + API_key);
-                // ファイルを閉じる
                 writer.Close();
+                //                reader.Close();
+                return;
             }
+            
+
+            /*
+            // APIキーがあるか確認
+            using (StreamReader reader = new StreamReader(API_read))
+            {
+ //               MessageBox.Show(username);
+                // 1 行ずつ読み込む
+                while (0 <= reader.Peek())
+                {
+                    string row = reader.ReadLine();
+//                    MessageBox.Show(row);
+
+                    //カンマ区切り
+                    string[] columns = row.Split(',');
+
+                    //                    MessageBox.Show(columns[0]);
+                    //API書き込み
+                    if (columns[0] != username)
+                    {
+                        // ファイルを開く
+                        StreamWriter writer = new StreamWriter(API_write, true);
+
+                        string API_key = API.Text;
+                        writer.WriteLine(username + "," + API_key);
+                        writer.Close();
+
+                        MessageBox.Show("APIキーを登録しました。\r\nID:"+username+"\r\nAPIキー："+API_key);
+                        break;
+                    }
+                    else {
+                        MessageBox.Show("あなたのAPIキーは既に登録されています。\r\n情シID ：" + username + "\r\nAPIキー：" + columns[1]);
+                    }
+                }
+                reader.Close();
+                File.Copy(API_write, API_read, true);
+            }
+            return;
+            */
         }
     }
 }
